@@ -1,0 +1,21 @@
+{
+    "name": "splot/assets-module",
+    "description": "Assets manager module for Splot Framework.",
+    "keywords": ["splot", "module", "assets", "js", "css"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michał Dudek",
+            "email": "michal@michaldudek.pl"
+        }
+    ],
+     "require": {
+        "php": ">=5.3.3",
+        "symfony/filesystem": "dev-master",
+        "splot/foundation": "dev-master",
+        "splot/framework": "dev-master"
+    },
+    "autoload": {
+    	"psr-0": { "Splot\\AssetsModule": "src/" }
+    }
+}

@@ -11,7 +11,8 @@
  */
 namespace Splot\AssetsModule\EventListener;
 
-use Splot\Framework\EventManager\AbstractEvent;
+use Splot\EventManager\AbstractEvent;
+
 use Splot\Framework\Events\WillSendResponse;
 
 use Splot\AssetsModule\Assets\AssetsContainer\JavaScriptContainer;

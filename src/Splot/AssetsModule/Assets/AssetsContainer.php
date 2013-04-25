@@ -11,9 +11,9 @@
  */
 namespace Splot\AssetsModule\Assets;
 
-use Splot\Foundation\Debug\Debugger;
-use Splot\Foundation\Utils\ArrayUtils;
-use Splot\Foundation\Utils\StringUtils;
+use MD\Foundation\Debug\Debugger;
+use MD\Foundation\Utils\ArrayUtils;
+use MD\Foundation\Utils\StringUtils;
 
 use Splot\AssetsModule\Assets\AssetsFinder;
 

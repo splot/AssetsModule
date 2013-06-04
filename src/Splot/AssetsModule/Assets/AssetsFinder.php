@@ -124,7 +124,7 @@ class AssetsFinder
 	public function getAssetPath($resource, $type = '') {
 		// delegate this task to resource finder
 		$type = (empty($type)) ? '' : DS . $type;
-		return $this->_finder->findResource($resource, 'public'. $type);
+		return $this->_finder->find($resource, 'public'. $type);
 	}
 
 }

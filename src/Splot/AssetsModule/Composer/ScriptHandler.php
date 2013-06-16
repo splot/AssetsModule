@@ -13,10 +13,11 @@
  */
 namespace Splot\AssetsModule\Composer;
 
-use Splot\Framework\Composer\AbstractScriptHandler;
 use Composer\Script\Event;
 
 use MD\Foundation\Utils\StringUtils;
+
+use Splot\Framework\Composer\AbstractScriptHandler;
 use Splot\Framework\Modules\AbstractModule;
 
 class ScriptHandler extends AbstractScriptHandler

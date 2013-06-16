@@ -22,6 +22,8 @@ use Splot\AssetsModule\Twig\Extension\AssetsExtension;
 class SplotAssetsModule extends AbstractModule
 {
 
+    protected $_commandNamespace = 'assets';
+
 	/**
 	 * Boots the module.
 	 */

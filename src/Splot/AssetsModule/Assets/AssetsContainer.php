@@ -112,6 +112,10 @@ abstract class AssetsContainer
 			}
 		}
 
+        foreach($packagedAssets as $package => $assets) {
+            $packagedAssets[$package] = ArrayUtils::keyFilter($assets, 'resource');
+        }
+
 		$this->_sortedAssets = array_merge($sortedPackagedAssets, $packagedAssets);
 	}
 

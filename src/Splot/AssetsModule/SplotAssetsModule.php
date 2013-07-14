@@ -24,52 +24,52 @@ class SplotAssetsModule extends AbstractModule
 
     protected $_commandNamespace = 'assets';
 
-	/**
-	 * Boots the module.
-	 */
-	public function boot() {
-		$config = $this->getConfig();
-		$container = $this->container;
+    /**
+     * Boots the module.
+     */
+    public function boot() {
+        $config = $this->getConfig();
+        $container = $this->container;
 
-		/*
-		 * SERVICES
-		 */
-		// register assets finder service
-		$container->set('assets_finder', function($c) use ($config) {
-			return new AssetsFinder($c->get('application'), $c->get('resource_finder'), $config->get('application_dir'), $config->get('modules_dir'));
-		}, true, true);
+        /*
+         * SERVICES
+         */
+        // register assets finder service
+        $container->set('assets_finder', function($c) use ($config) {
+            return new AssetsFinder($c->get('application'), $c->get('resource_finder'), $config->get('application_dir'), $config->get('modules_dir'));
+        }, true, true);
 
-		// register assets containers services
-		$container->set('javascripts', function($c) {
-			return new JavaScriptContainer($c->get('assets_finder'));
-		}, true, true);
+        // register assets containers services
+        $container->set('javascripts', function($c) {
+            return new JavaScriptContainer($c->get('assets_finder'));
+        }, true, true);
 
-		$container->set('stylesheets', function($c) {
-			return new StylesheetContainer($c->get('assets_finder'));
-		}, true, true);
+        $container->set('stylesheets', function($c) {
+            return new StylesheetContainer($c->get('assets_finder'));
+        }, true, true);
 
-		/*
-		 * EVENT LISTENERS
-		 */
-		$container->get('event_manager')->subscribe(WillSendResponse::getName(), function(WillSendResponse $event) use ($container) {
-			$injector = new InjectAssets($container->get('javascripts'), $container->get('stylesheets'));
-			$injector->injectAssetsOnResponse($event);
-		}, -9999);
+        /*
+         * EVENT LISTENERS
+         */
+        $container->get('event_manager')->subscribe(WillSendResponse::getName(), function(WillSendResponse $event) use ($container) {
+            $injector = new InjectAssets($container->get('javascripts'), $container->get('stylesheets'));
+            $injector->injectAssetsOnResponse($event);
+        }, -9999);
 
-		/*
-		 * OTHER
-		 */
-		$this->registerTwigExtension();
-	}
+        /*
+         * OTHER
+         */
+        $this->registerTwigExtension();
+    }
 
-	/**
-	 * Registers Twig extension for assets management.
-	 */
-	public function registerTwigExtension() {
-		if ($this->container->has('twig')) {
-			$extension = new AssetsExtension($this->container->get('assets_finder'), $this->container->get('javascripts'), $this->container->get('stylesheets'));
-			$this->container->get('twig')->addExtension($extension);
-		}
-	}
+    /**
+     * Registers Twig extension for assets management.
+     */
+    public function registerTwigExtension() {
+        if ($this->container->has('twig')) {
+            $extension = new AssetsExtension($this->container->get('assets_finder'), $this->container->get('javascripts'), $this->container->get('stylesheets'));
+            $this->container->get('twig')->addExtension($extension);
+        }
+    }
 
 }

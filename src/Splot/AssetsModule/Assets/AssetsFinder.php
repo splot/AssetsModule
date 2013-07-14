@@ -83,6 +83,11 @@ class AssetsFinder
 			return $this->_cache[$resource];
 		}
 
+        // check if external asset and if so return the original
+        if (stripos($resource, 'http://') === 0 || stripos($resource, 'https://') === 0 || stripos($resource, '//') === 0) {
+            return $resource;
+        }
+
 		// check if asset even exists
 		if (!$this->getAssetPath($resource, $type)) {
 			throw new ResourceNotFoundException('Could not find asset "'. $resource .'".');

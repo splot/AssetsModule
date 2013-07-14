@@ -24,9 +24,9 @@ class JavaScriptContainer extends AssetsContainer
 	public function printAssets() {
 		$output = '';
 
-		foreach($this->getSortedAssets() as $name => $resources) {
+		foreach($this->getSortedAssets() as $package => $resources) {
 			foreach($resources as $asset) {
-				$output .= '<script type="text/javascript" src="'. $this->_finder->getAssetUrl($asset, 'js') .'" data-package="'. $name .'"></script>'. NL;
+				$output .= '<script type="text/javascript" src="'. $this->_finder->getAssetUrl($asset, 'js') .'" data-package="'. $package .'"></script>'. NL;
 			}
 		}
 

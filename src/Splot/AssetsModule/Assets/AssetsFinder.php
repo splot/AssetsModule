@@ -110,7 +110,7 @@ class AssetsFinder
 		$subDir = trim(str_replace(NS, DS, $nameArray[1]), DS);
 		$subDir = empty($subDir) ? null : $subDir . DS;
 
-		$url = $mainDir . $subDir . $type . $nameArray[2];
+		$url = $mainDir . $type . $subDir . $nameArray[2];
 		$url = '/'. ltrim($url, '/'); // make sure is absolute url
 
 		$this->_cache[$resource] = $url;

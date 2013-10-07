@@ -15,7 +15,11 @@
         "michaldudek/foundation": "dev-master",
         "splot/framework": "dev-master"
     },
+    "minimum-stability": "dev",
     "autoload": {
-    	"psr-0": { "Splot\\AssetsModule": "src/" }
+    	"psr-0": { 
+            "Splot\\AssetsModule\\Tests": "tests/",
+            "Splot\\AssetsModule": "src/"
+        }
     }
 }

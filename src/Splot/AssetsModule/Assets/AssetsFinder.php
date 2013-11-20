@@ -90,16 +90,16 @@ class AssetsFinder
             return $resource;
         }
 
-        // check if asset even exists
-        try {
-            $this->getAssetPath($resource, $type);
-        } catch(ResourceNotFoundException $e) {
-            // rethrow with a different message
-            throw new ResourceNotFoundException('Could not find asset "'. $resource .'".');
-        }
-
         $originalResource = $resource;
         list($resource, $type) = $this->transformSubdir($resource, $type);
+
+        // check if asset even exists
+        try {
+            $path = $this->getAssetPath($resource, $type);
+        } catch(ResourceNotFoundException $e) {
+            // rethrow with a different message
+            throw new ResourceNotFoundException('Could not find asset "'. $originalResource .'".');
+        }
 
         $nameArray = explode(':', $resource);
 

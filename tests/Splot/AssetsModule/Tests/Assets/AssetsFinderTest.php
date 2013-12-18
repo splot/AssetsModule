@@ -11,41 +11,62 @@ class AssetsFinderTest extends TestCase
 {
 
     public function setUp() {
+        $basePath = rtrim(__DIR__, DS) . DS . 'Stubs/';
+
+        $this->_options = array(
+            'applicationDir' => $basePath .'app/',
+            'webDir' => $basePath .'web/'
+        );
         parent::setUp();
         $this->_application->bootModule(new SplotAssetsTestModule());
     }
 
-    public function testGetAssetUrl() {
-        $finder = new AssetsFinder($this->_application, $this->_application->getContainer()->get('resource_finder'),
-            'app', 'assets');
-
-        $assets = array(
-            'http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js' => 'http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js',
-            'https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js' => 'https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js',
-            '//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js' => '//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js',
-            'SplotAssetsTestModule::adipiscit.js' => '/assets/splotassetstest/js/adipiscit.js',
-            'SplotAssetsTestModule::Lorem/ipsum.js' => '/assets/splotassetstest/js/Lorem/ipsum.js',
-            'SplotAssetsTestModule::Lorem/Dolor/sit.js' => '/assets/splotassetstest/js/Lorem/Dolor/sit.js',
-            'SplotAssetsTestModule:Lorem:lipsum.js' => '/assets/splotassetstest/Lorem/js/lipsum.js',
-            'SplotAssetsTestModule:Lorem:Dolor/sit.js' => '/assets/splotassetstest/Lorem/js/Dolor/sit.js',
-            'SplotAssetsTestModule::Lorem/Dolor/sit.js' => '/assets/splotassetstest/js/Lorem/Dolor/sit.js',
-            //'::index.js' => '/app/js/index.js' // need to set application dir in the tested application
+    /**
+     * @dataProvider provideAssetsWithUrls
+     */
+    public function testGetAssetUrl($asset, $resolved) {
+        $finder = new AssetsFinder(
+            $this->_application,
+            $this->_application->getContainer()->get('resource_finder'),
+            $this->_application->getContainer()->getParameter('web_dir'),
+            'app',
+            'assets'
         );
 
-        foreach($assets as $search => $result) {
-            $this->assertEquals($result, $finder->getAssetUrl($search, 'js'));
-        }
+        $this->assertEquals($resolved, $finder->getAssetUrl($asset, 'js'));
 
-        // call one once more to check memory cache
-        $this->assertEquals('/assets/splotassetstest/js/Lorem/Dolor/sit.js', $finder->getAssetUrl('SplotAssetsTestModule::Lorem/Dolor/sit.js', 'js'));
+        // call one once more to cover memory cache
+        $this->assertEquals($resolved, $finder->getAssetUrl($asset, 'js'));
+    }
+
+    public function provideAssetsWithUrls() {
+        return array(
+            array('http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', 'http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'),
+            array('https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', 'https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'),
+            array('//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', '//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'),
+            array('SplotAssetsTestModule::adipiscit.js', '/assets/splotassetstest/js/adipiscit.js'),
+            array('SplotAssetsTestModule::Lorem/ipsum.js', '/assets/splotassetstest/js/Lorem/ipsum.js'),
+            array('SplotAssetsTestModule::Lorem/Dolor/sit.js', '/assets/splotassetstest/js/Lorem/Dolor/sit.js'),
+            array('SplotAssetsTestModule:Lorem:lipsum.js', '/assets/splotassetstest/Lorem/js/lipsum.js'),
+            array('SplotAssetsTestModule:Lorem:Dolor/sit.js', '/assets/splotassetstest/Lorem/js/Dolor/sit.js'),
+            array('SplotAssetsTestModule::Lorem/Dolor/sit.js', '/assets/splotassetstest/js/Lorem/Dolor/sit.js'),
+            array('::index.js', '/app/js/index.js'), // need to set application dir in the tested application
+            array('@/js/lib/jquery.min.js', '/js/lib/jquery.min.js'),
+            array('@js/lib/jquery.min.js', '/js/lib/jquery.min.js')
+        );
     }
 
     /**
      * @expectedException \Splot\Framework\Resources\Exceptions\ResourceNotFoundException
      */
     public function testGetAssetUrlInvalid() {
-         $finder = new AssetsFinder($this->_application, $this->_application->getContainer()->get('resource_finder'),
-            '', '');
+         $finder = new AssetsFinder(
+            $this->_application,
+            $this->_application->getContainer()->get('resource_finder'),
+            $this->_application->getContainer()->getParameter('web_dir'),
+            'app',
+            'assets'
+        );
          $finder->getAssetUrl('SplotAssetsTestModule::nonexistent.js', 'js');
     }
 
@@ -53,27 +74,47 @@ class AssetsFinderTest extends TestCase
      * @expectedException \MD\Foundation\Exceptions\InvalidArgumentException
      */
     public function testGetAssetPathInvalid() {
-        $finder = new AssetsFinder($this->_application, $this->_application->getContainer()->get('resource_finder'),
-            '', '');
+        $finder = new AssetsFinder(
+            $this->_application,
+            $this->_application->getContainer()->get('resource_finder'),
+            $this->_application->getContainer()->getParameter('web_dir'),
+            'app',
+            'assets'
+        );
         $finder->getAssetPath('random');
     }
 
-    public function testGetAssetPath() {
-        $finder = new AssetsFinder($this->_application, $this->_application->getContainer()->get('resource_finder'),
-            '', '');
-
-        $basePath = rtrim(__DIR__, DS) . DS . 'Stubs/AssetsTestModule/Resources/public/';
-        $assets = array(
-            'SplotAssetsTestModule::adipiscit.js' => $basePath .'js/adipiscit.js',
-            'SplotAssetsTestModule::Lorem/ipsum.js' => $basePath .'js/Lorem/ipsum.js',
-            'SplotAssetsTestModule::Lorem/Dolor/sit.js' => $basePath .'js/Lorem/Dolor/sit.js',
-            'SplotAssetsTestModule:Lorem:lipsum.js' => $basePath .'Lorem/js/lipsum.js',
-            'SplotAssetsTestModule:Lorem:Dolor/sit.js' => $basePath .'Lorem/js/Dolor/sit.js'
+    /**
+     * @dataProvider provideAssetsWithPaths
+     */
+    public function testGetAssetPath($asset, $path) {
+        $finder = new AssetsFinder(
+            $this->_application,
+            $this->_application->getContainer()->get('resource_finder'),
+            $this->_application->getContainer()->getParameter('web_dir'),
+            'app',
+            'assets'
         );
 
-        foreach($assets as $search => $result) {
-            $this->assertEquals($result, $finder->getAssetPath($search, 'js'));
-        }
+        $this->assertEquals($path, $finder->getAssetPath($asset, 'js'));
+    }
+
+    public function provideAssetsWithPaths() {
+        $basePath = rtrim(__DIR__, DS) . DS . 'Stubs/';
+        $appPath = $basePath .'app/';
+        $webPath = $basePath .'web/';
+        $testModulePath = $basePath .'AssetsTestModule/Resources/public/';
+
+        return array(
+            array('SplotAssetsTestModule::adipiscit.js', $testModulePath .'js/adipiscit.js'),
+            array('SplotAssetsTestModule::Lorem/ipsum.js', $testModulePath .'js/Lorem/ipsum.js'),
+            array('SplotAssetsTestModule::Lorem/Dolor/sit.js', $testModulePath .'js/Lorem/Dolor/sit.js'),
+            array('SplotAssetsTestModule:Lorem:lipsum.js', $testModulePath .'Lorem/js/lipsum.js'),
+            array('SplotAssetsTestModule:Lorem:Dolor/sit.js', $testModulePath .'Lorem/js/Dolor/sit.js'),
+            array('::index.js', $appPath .'Resources/public/js/index.js'),
+            array('@/js/lib/jquery.min.js', $webPath .'js/lib/jquery.min.js'),
+            array('@js/lib/jquery.min.js', $webPath .'js/lib/jquery.min.js')
+        );
     }
 
 }

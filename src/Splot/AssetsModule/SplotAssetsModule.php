@@ -36,17 +36,23 @@ class SplotAssetsModule extends AbstractModule
          */
         // register assets finder service
         $container->set('assets_finder', function($c) use ($config) {
-            return new AssetsFinder($c->get('application'), $c->get('resource_finder'), $config->get('application_dir'), $config->get('modules_dir'));
-        }, true, true);
+            return new AssetsFinder(
+                $c->get('application'),
+                $c->get('resource_finder'),
+                $c->getParameter('web_dir'),
+                $config->get('application_dir'),
+                $config->get('modules_dir')
+            );
+        });
 
         // register assets containers services
         $container->set('javascripts', function($c) {
             return new JavaScriptContainer($c->get('assets_finder'));
-        }, true, true);
+        });
 
         $container->set('stylesheets', function($c) {
             return new StylesheetContainer($c->get('assets_finder'));
-        }, true, true);
+        });
 
         /*
          * EVENT LISTENERS
@@ -67,7 +73,11 @@ class SplotAssetsModule extends AbstractModule
      */
     public function registerTwigExtension() {
         if ($this->container->has('twig')) {
-            $extension = new AssetsExtension($this->container->get('assets_finder'), $this->container->get('javascripts'), $this->container->get('stylesheets'));
+            $extension = new AssetsExtension(
+                $this->container->get('assets_finder'),
+                $this->container->get('javascripts'),
+                $this->container->get('stylesheets')
+            );
             $this->container->get('twig')->addExtension($extension);
         }
     }

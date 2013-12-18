@@ -35,6 +35,13 @@ class AssetsFinder
     protected $_finder;
 
     /**
+     * Path to the public web directory.
+     * 
+     * @var string
+     */
+    protected $_webDir;
+
+    /**
      * URL of publicly available directory where application assets are stored.
      * 
      * @var string
@@ -63,11 +70,12 @@ class AssetsFinder
      * @param string $applicationAssetsDir Directory for application assets.
      * @param string $modulesAssetsDir Directory for modules assets.
      */
-    public function __construct(AbstractApplication $application, Finder $finder, $applicationAssetsDir, $modulesAssetsDir) {
+    public function __construct(AbstractApplication $application, Finder $finder, $webDir, $applicationAssetsDir, $modulesAssetsDir) {
         $this->_application = $application;
         $this->_finder = $finder;
-        $this->_applicationAssetsDir = preg_replace('/^web/', '', $applicationAssetsDir);
-        $this->_modulesAssetsDir = preg_replace('/^web/', '', $modulesAssetsDir);
+        $this->_webDir = $webDir;
+        $this->_applicationAssetsDir = $applicationAssetsDir;
+        $this->_modulesAssetsDir = $modulesAssetsDir;
     }
 
     /**
@@ -88,6 +96,12 @@ class AssetsFinder
         // check if external asset and if so return the original
         if (stripos($resource, 'http://') === 0 || stripos($resource, 'https://') === 0 || stripos($resource, '//') === 0) {
             return $resource;
+        }
+
+        // check if asset from web dir
+        if (stripos($resource, '@') === 0) {
+            // return absolute path
+            return '/'. ltrim(substr($resource, 1), '/');
         }
 
         $originalResource = $resource;
@@ -132,6 +146,11 @@ class AssetsFinder
      * @throws ResourceNotFoundException When the given resource doesn't exist.
      */
     public function getAssetPath($resource, $type = '') {
+        // check if asset from web dir
+        if (stripos($resource, '@') === 0) {
+            return $this->_webDir . ltrim(substr($resource, 1), '/');
+        }
+
         list($resource, $type) = $this->transformSubdir($resource, $type);
         $type = !empty($type) ? DS . trim($type, DS) : $type;
 

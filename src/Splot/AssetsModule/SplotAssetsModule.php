@@ -41,7 +41,8 @@ class SplotAssetsModule extends AbstractModule
                 $c->get('resource_finder'),
                 $c->getParameter('web_dir'),
                 $config->get('application_dir'),
-                $config->get('modules_dir')
+                $config->get('modules_dir'),
+                $config->get('overwritten_dir')
             );
         });
 

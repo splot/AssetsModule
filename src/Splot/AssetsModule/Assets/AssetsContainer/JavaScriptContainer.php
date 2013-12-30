@@ -17,6 +17,13 @@ class JavaScriptContainer extends AssetsContainer
 {
 
 	/**
+	 * Assets type for this container.
+	 * 
+	 * @var string
+	 */
+	protected $_type = 'js';
+
+	/**
 	 * Returns <script> tags for all added javascripts.
 	 * 
 	 * @return string
@@ -24,9 +31,9 @@ class JavaScriptContainer extends AssetsContainer
 	public function printAssets() {
 		$output = '';
 
-		foreach($this->getSortedAssets() as $package => $resources) {
-			foreach($resources as $asset) {
-				$output .= '<script type="text/javascript" src="'. $this->_finder->getAssetUrl($asset, 'js') .'" data-package="'. $package .'"></script>'. NL;
+		foreach($this->getSortedAssets() as $package => $assets) {
+			foreach($assets as $asset) {
+				$output .= '<script type="text/javascript" src="'. $asset['url'] .'" data-package="'. $package .'"></script>'. NL;
 			}
 		}
 

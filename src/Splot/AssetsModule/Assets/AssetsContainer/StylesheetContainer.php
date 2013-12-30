@@ -17,6 +17,13 @@ class StylesheetContainer extends AssetsContainer
 {
 
 	/**
+	 * Assets type for this container.
+	 * 
+	 * @var string
+	 */
+	protected $_type = 'css';
+
+	/**
 	 * Returns <link> tags for all included stylesheets.
 	 * 
 	 * @return string
@@ -24,9 +31,9 @@ class StylesheetContainer extends AssetsContainer
 	public function printAssets() {
 		$output = '';
 
-		foreach($this->getSortedAssets() as $name => $resources) {
-			foreach($resources as $asset) {
-				$output .= '<link rel="stylesheet" href="'. $this->_finder->getAssetUrl($asset, 'css') .'" data-package="'. $name .'">'. NL;
+		foreach($this->getSortedAssets() as $package => $assets) {
+			foreach($assets as $asset) {
+				$output .= '<link rel="stylesheet" href="'. $asset['url'] .'" data-package="'. $package .'">'. NL;
 			}
 		}
 

@@ -26,6 +26,7 @@ class Install extends AbstractCommand
         $rootDir = $this->getParameter('root_dir');
         $applicationAssetsDir = $rootDir . $config->get('application_dir');
         $moduleAssetsDir = $rootDir . $config->get('modules_dir');
+        $overwrittenAssetsDir = $rootDir . $config->get('overwrittenAssetsDir');
 
         // install global application assets
         $this->installApplicationAssets($application->getApplicationDir(), $applicationAssetsDir);
@@ -34,6 +35,9 @@ class Install extends AbstractCommand
         $modules = $application->getModules();
         foreach($modules as $module) {
             $this->installModuleAssets($module, $moduleAssetsDir);
+
+            // also install overwritten assets dirs
+            $this->installOverwrittenModuleAssets($module, $application->getApplicationDir(), $overwrittenAssetsDir);
         }
 
         $this->writeln('Done.');
@@ -87,6 +91,33 @@ class Install extends AbstractCommand
 
         $filesystem->remove($moduleLinkDir);
         $filesystem->symlink($moduleAssetsDir, $moduleLinkDir, false);
+    }
+
+    /**
+     * Installs module assets that were overwritten in the application's resources dir.
+     * 
+     * @param AbstractModule $module Module for which assets should be installed.
+     * @param string $applicationDir Application directory.
+     * @param string $linkDir Where the link should be located.
+     */
+    protected function installOverwrittenModuleAssets(AbstractModule $module, $applicationDir, $linkDir) {
+        $filesystem = $this->get('filesystem');
+        $rootDir = $this->getParameter('root_dir');
+        $linkDir = rtrim($linkDir, '/');
+
+        $overwrittenAssetsDir = $applicationDir .'Resources/'. $module->getName() .'/public';
+
+        // break if there are no overwritten assets for this module
+        if (!is_dir($overwrittenAssetsDir)) {
+            return false;
+        }
+
+        $overwrittenLinkDir = $linkDir . preg_replace('/module$/', '', strtolower($module->getName()));
+
+        $this->writeln('Installing <info>overwritten</info> assets into <comment>'. $filesystem->makePathRelative($overwrittenLinkDir, $rootDir) .'</comment>');
+
+        $filesystem->remove($overwrittenLinkDir);
+        $filesystem->symlink($overwrittenAssetsDir, $overwrittenLinkDir, false);
     }
 
 }

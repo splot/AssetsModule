@@ -30,7 +30,8 @@ class AssetsFinderTest extends TestCase
             $this->_application->getContainer()->get('resource_finder'),
             $this->_application->getContainer()->getParameter('web_dir'),
             'app',
-            'assets'
+            'assets',
+            'custom'
         );
 
         $this->assertEquals($resolved, $finder->getAssetUrl($asset, 'js'));
@@ -52,7 +53,19 @@ class AssetsFinderTest extends TestCase
             array('SplotAssetsTestModule::Lorem/Dolor/sit.js', '/assets/splotassetstest/js/Lorem/Dolor/sit.js'),
             array('::index.js', '/app/js/index.js'), // need to set application dir in the tested application
             array('@/js/lib/jquery.min.js', '/js/lib/jquery.min.js'),
-            array('@js/lib/jquery.min.js', '/js/lib/jquery.min.js')
+            array('@js/lib/jquery.min.js', '/js/lib/jquery.min.js'),
+            array('@/js/*.js', array(
+                '/js/contact.js',
+                '/js/index.js',
+                '/js/map.js'
+            )),
+            array('SplotAssetsTestModule::*.js', array(
+                '/custom/splotassetstest/js/overwrite.js',
+                '/custom/splotassetstest/js/overwritten.js',
+                '/assets/splotassetstest/js/adipiscit.js',
+                '/assets/splotassetstest/js/lipsum.js',
+                '/assets/splotassetstest/js/lorem.js',
+            )),
         );
     }
 
@@ -65,7 +78,8 @@ class AssetsFinderTest extends TestCase
             $this->_application->getContainer()->get('resource_finder'),
             $this->_application->getContainer()->getParameter('web_dir'),
             'app',
-            'assets'
+            'assets',
+            'custom'
         );
          $finder->getAssetUrl('SplotAssetsTestModule::nonexistent.js', 'js');
     }
@@ -79,9 +93,26 @@ class AssetsFinderTest extends TestCase
             $this->_application->getContainer()->get('resource_finder'),
             $this->_application->getContainer()->getParameter('web_dir'),
             'app',
-            'assets'
+            'assets',
+            'custom'
         );
         $finder->getAssetPath('random');
+    }
+
+    /**
+     * @expectedException \Splot\Framework\Resources\Exceptions\ResourceNotFoundException
+     */
+    public function testGetWebAssetPathInvalid() {
+        $finder = new AssetsFinder(
+            $this->_application,
+            $this->_application->getContainer()->get('resource_finder'),
+            $this->_application->getContainer()->getParameter('web_dir'),
+            'app',
+            'assets',
+            'custom'
+        );
+        $path = $finder->getAssetPath('@/images/img.png');
+        \MD\dump($path);
     }
 
     /**
@@ -93,9 +124,13 @@ class AssetsFinderTest extends TestCase
             $this->_application->getContainer()->get('resource_finder'),
             $this->_application->getContainer()->getParameter('web_dir'),
             'app',
-            'assets'
+            'assets',
+            'custom'
         );
 
+        $this->assertEquals($path, $finder->getAssetPath($asset, 'js'));
+
+        // call one once more to cover memory cache
         $this->assertEquals($path, $finder->getAssetPath($asset, 'js'));
     }
 
@@ -106,6 +141,9 @@ class AssetsFinderTest extends TestCase
         $testModulePath = $basePath .'AssetsTestModule/Resources/public/';
 
         return array(
+            array('http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', 'http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'),
+            array('https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', 'https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'),
+            array('//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', '//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'),
             array('SplotAssetsTestModule::adipiscit.js', $testModulePath .'js/adipiscit.js'),
             array('SplotAssetsTestModule::Lorem/ipsum.js', $testModulePath .'js/Lorem/ipsum.js'),
             array('SplotAssetsTestModule::Lorem/Dolor/sit.js', $testModulePath .'js/Lorem/Dolor/sit.js'),
@@ -113,7 +151,19 @@ class AssetsFinderTest extends TestCase
             array('SplotAssetsTestModule:Lorem:Dolor/sit.js', $testModulePath .'Lorem/js/Dolor/sit.js'),
             array('::index.js', $appPath .'Resources/public/js/index.js'),
             array('@/js/lib/jquery.min.js', $webPath .'js/lib/jquery.min.js'),
-            array('@js/lib/jquery.min.js', $webPath .'js/lib/jquery.min.js')
+            array('@js/lib/jquery.min.js', $webPath .'js/lib/jquery.min.js'),
+            array('@/js/*.js', array(
+                $webPath .'js/contact.js',
+                $webPath .'js/index.js',
+                $webPath .'js/map.js'
+            )),
+            array('SplotAssetsTestModule::*.js', array(
+                $appPath .'Resources/SplotAssetsTestModule/public/js/overwrite.js',
+                $appPath .'Resources/SplotAssetsTestModule/public/js/overwritten.js',
+                $testModulePath .'js/adipiscit.js',
+                $testModulePath .'js/lipsum.js',
+                $testModulePath .'js/lorem.js'
+            )),
         );
     }
 

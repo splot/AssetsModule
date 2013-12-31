@@ -23,10 +23,10 @@ class Install extends AbstractCommand
         $config = $assetsModule->getConfig();
 
         // create dirs 
-        $rootDir = $this->getParameter('root_dir');
-        $applicationAssetsDir = $rootDir . $config->get('application_dir');
-        $moduleAssetsDir = $rootDir . $config->get('modules_dir');
-        $overwrittenAssetsDir = $rootDir . $config->get('overwrittenAssetsDir');
+        $webDir = $this->getParameter('web_dir');
+        $applicationAssetsDir = $webDir . $config->get('application_dir');
+        $moduleAssetsDir = $webDir . $config->get('modules_dir');
+        $overwrittenAssetsDir = $webDir . $config->get('overwritten_dir');
 
         // install global application assets
         $this->installApplicationAssets($application->getApplicationDir(), $applicationAssetsDir);
@@ -103,7 +103,7 @@ class Install extends AbstractCommand
     protected function installOverwrittenModuleAssets(AbstractModule $module, $applicationDir, $linkDir) {
         $filesystem = $this->get('filesystem');
         $rootDir = $this->getParameter('root_dir');
-        $linkDir = rtrim($linkDir, '/');
+        $linkDir = rtrim($linkDir, '/') .'/';
 
         $overwrittenAssetsDir = $applicationDir .'Resources/'. $module->getName() .'/public';
 
@@ -114,7 +114,7 @@ class Install extends AbstractCommand
 
         $overwrittenLinkDir = $linkDir . preg_replace('/module$/', '', strtolower($module->getName()));
 
-        $this->writeln('Installing <info>overwritten</info> assets into <comment>'. $filesystem->makePathRelative($overwrittenLinkDir, $rootDir) .'</comment>');
+        $this->writeln('Installing overwritten assets for <info>'. $module->getName() .'</info> into <comment>'. $filesystem->makePathRelative($overwrittenLinkDir, $rootDir) .'</comment>');
 
         $filesystem->remove($overwrittenLinkDir);
         $filesystem->symlink($overwrittenAssetsDir, $overwrittenLinkDir, false);

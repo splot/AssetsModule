@@ -88,6 +88,9 @@ abstract class AssetsContainer
     /**
      * Adds an asset.
      *
+     * Can use GLOB patterns when adding assets - they will get expanded and each asset will be added separately
+     * with the same parameters (package and priority).
+     *
      * Returns an array collection of added assets and their data.
      * 
      * @param string $resource Resource link to the asset.
@@ -96,17 +99,17 @@ abstract class AssetsContainer
      * @return array
      */
     public function addAsset($resource, $package = 'page', $priority = 0) {
-        $files = $this->_finder->getAssetPath($resource, $this->_type);
-        $files = !is_array($files) ? array($files) : $files;
+        $resources = $this->_finder->expand($resource, $this->_type);
 
         $assets = array();
-        foreach($files as $file) {
+
+        foreach($resources as $asset) {
             $assets[] = array(
-                'resource' => $resource,
+                'resource' => $asset,
                 'package' => $package,
                 'priority' => $priority,
-                'path' => $file,
-                'url' => $this->_finder->getAssetUrl($resource, $this->_type)
+                'path' => $this->_finder->getAssetPath($asset, $this->_type),
+                'url' => $this->_finder->getAssetUrl($asset, $this->_type)
             );
         }
 

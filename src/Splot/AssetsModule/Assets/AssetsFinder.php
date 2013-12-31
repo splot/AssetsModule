@@ -64,11 +64,11 @@ class AssetsFinder
     protected $_overwrittenModuleAssetsDir;
 
     /**
-     * Cache in which the finder stores already resolved assets.
+     * Cache in which the finder stores already resolved assets urls.
      * 
      * @var array
      */
-    protected $_cache = array();
+    protected $_urlCache = array();
 
     /**
      * Cache in which the finder stores already resolved assets paths.
@@ -105,7 +105,7 @@ class AssetsFinder
     /**
      * Returns URL for the given asset resource.
      * 
-     * @param string $resource
+     * @param string $resource Asset name.
      * @param string $type [optional] Sub directory in which this asset is. Default: ''.
      * @return string
      * 
@@ -113,86 +113,65 @@ class AssetsFinder
      */
     public function getAssetUrl($resource, $type = '') {
         $cacheKey = $type .'#'. $resource;
-        // try to resolve from cache
-        if (isset($this->_cache[$cacheKey])) {
-            return $this->_cache[$cacheKey];
+        if (isset($this->_urlCache[$cacheKey])) {
+            return $this->_urlCache[$cacheKey];
         }
 
         // check if external asset and if so return the original
         if (stripos($resource, 'http://') === 0 || stripos($resource, 'https://') === 0 || stripos($resource, '//') === 0) {
-            $this->_cache[$cacheKey] = $resource;
-            return $this->_cache[$cacheKey];
+            $this->_urlCache[$cacheKey] = $resource;
+            return $resource;
         }
 
-        // check if asset even exists
+        // check if resource even exists
         try {
-            $files = $this->getAssetPath($resource, $type);
-            $files = !is_array($files) ? array($files) : $files;
+            $file = $this->getAssetPath($resource, $type);
         } catch(ResourceNotFoundException $e) {
-            // rethrow with a different message
-            throw new ResourceNotFoundException('Could not find asset "'. $resource .'".');
+            throw new ResourceNotFoundException('Could not find asset "'. $resource .'".'); // rethrow with a different message
         }
-
-        $urls = array();
 
         // check if asset from web dir
         if (stripos($resource, '@') === 0) {
-            foreach($files as $file) {
-                $urls[] = '/'. substr($file, strlen($this->_webDir));
-            }
-
-            $this->_cache[$cacheKey] = count($urls) === 1 ? $urls[0] : $urls;
-            return $this->_cache[$cacheKey];
+            $url = '/'. mb_substr($file, mb_strlen($this->_webDir));
+            $this->_urlCache[$cacheKey] = $url;
+            return $url;
         }
 
-        // asset from app or module, so parse some sections of it
+        // adjust and parse the resource name
         list($resource, $type) = $this->transformSubdir($resource, $type);
-        $nameArray = explode(':', $resource);
+        list($moduleName, $subDir, $resourceFile) = explode(':', $resource);
 
-        $appAssetsDir = $this->_application->getApplicationDir() .'Resources/public/';
-        $appAssetsDirLength = strlen($appAssetsDir);
+        $appAssetsDir = $this->_application->getApplicationDir() .'Resources'. DS .'public'. DS;
 
-        if (!empty($nameArray[0])) {
-            $module = $this->_application->getModule($nameArray[0]);
-            $moduleAssetName = preg_replace('/module$/', '', strtolower($module->getName())) .'/';
-            $moduleAssetsDir = $module->getModuleDir() .'Resources/public/';
-            $moduleAssetsDirLength = strlen($moduleAssetsDir);
+        if (!empty($moduleName)) {
+            $module = $this->_application->getModule($moduleName);
+            $moduleAssetsDir = $module->getModuleDir() .'Resources'. DS .'public'. DS;
+            $moduleOverwrittenAssetsDir = $this->_application->getApplicationDir() .'Resources'. DS . $module->getName() . DS .'public'. DS;
 
-            $moduleOverwrittenAssetsDir = $this->_application->getApplicationDir() .'Resources/'. $module->getName() .'/public/';
-            $moduleOverwrittenAssetsDirLength = strlen($moduleOverwrittenAssetsDir);
+            $moduleAssetName = preg_replace('/module$/', '', mb_strtolower($module->getName())) .'/';
         }
 
-        foreach($files as $file) {
-            // from app dir?
-            if (stripos($file, $appAssetsDir) === 0) {
-                $urls[] = $this->_applicationAssetsDir . substr($file, $appAssetsDirLength);
-                continue;
-            }
-
+        // from app dir?
+        if (stripos($file, $appAssetsDir) === 0) {
+            $url = $this->_applicationAssetsDir . mb_substr($file, mb_strlen($appAssetsDir));
+        } else if (stripos($file, $moduleOverwrittenAssetsDir) === 0) {
             // from overwritten module dir?
-            if (stripos($file, $moduleOverwrittenAssetsDir) === 0) {
-                $urls[] = $this->_overwrittenModuleAssetsDir . $moduleAssetName . substr($file, $moduleOverwrittenAssetsDirLength);
-                continue;
-            }
-
+            $url = $this->_overwrittenModuleAssetsDir . $moduleAssetName . mb_substr($file, mb_strlen($moduleOverwrittenAssetsDir));
+        } else {
             // from module dir then
-            $urls[] = $this->_modulesAssetsDir . $moduleAssetName . substr($file, $moduleAssetsDirLength);
+            $url = $this->_modulesAssetsDir . $moduleAssetName . mb_substr($file, mb_strlen($moduleAssetsDir));
         }
 
-        $this->_cache[$cacheKey] = count($urls) === 1 ? $urls[0] : $urls;
-        return $this->_cache[$cacheKey];
+        $this->_urlCache[$cacheKey] = $url;
+        return $url;
     }
 
     /**
      * Returns path to an asset resource.
-     *
-     * GLOB patterns are allowed in the file name section of the resource pattern.
-     *
-     * If using GLOB patterns and multiple files were found then they are returned in an array.
      * 
      * @param string $resource
      * @param string $type [optional] Sub directory in which this asset is. Default: ''.
-     * @return string|array
+     * @return string
      * 
      * @throws ResourceNotFoundException When the given resource doesn't exist.
      */
@@ -205,40 +184,73 @@ class AssetsFinder
         // check if external asset and if so return the original
         if (stripos($resource, 'http://') === 0 || stripos($resource, 'https://') === 0 || stripos($resource, '//') === 0) {
             $this->_pathsCache[$cacheKey] = $resource;
-            return $this->_pathsCache[$cacheKey];
+            return $resource;
         }
 
         // check if asset from web dir
         if (stripos($resource, '@') === 0) {
-            $path = $this->_webDir . ltrim(substr($resource, 1), '/');
-            $files = FilesystemUtils::glob($path, GLOB_NOCHECK | GLOB_BRACE);
+            $path = $this->_webDir . ltrim(mb_substr($resource, 1), DS);
 
-            if ($files) {
-                // if glob returned more than one file then just return it - it wouldn't return nonexistent files
-                if (count($files) > 1) {
-                    $this->_pathsCache[$cacheKey] = $files;
-                    return $this->_pathsCache[$cacheKey];
-                }
-
-                $files = count($files) === 1 ? $files[0] : '';
-            }
-
-            if (!file_exists($files)) {
+            if (!file_exists($path)) {
                 throw new ResourceNotFoundException('Resource "'. $resource .'" not found in web dir.');
             }
 
-            $this->_pathsCache[$cacheKey] = $files;
-            return $this->_pathsCache[$cacheKey];
+            $this->_pathsCache[$cacheKey] = $path;
+            return $path;
         }
 
         list($resource, $type) = $this->transformSubdir($resource, $type);
         $type = !empty($type) ? DS . trim($type, DS) : $type;
 
         // delegate this task to resource finder
-        $files = $this->_finder->find($resource, 'public'. $type);
+        $path = $this->_finder->findResource($resource, 'public'. $type);
 
-        $this->_pathsCache[$cacheKey] = $files;
-        return $this->_pathsCache[$cacheKey];
+        $this->_pathsCache[$cacheKey] = $path;
+        return $path;
+    }
+
+    /**
+     * Expands GLOB assets pattern.
+     * 
+     * @param  string $resource Resource name or pattern to be expanded.
+     * @param  string $type     Asset type.
+     * @return array
+     */
+    public function expand($resource, $type = '') {
+        // check if external asset and if so return the original
+        if (stripos($resource, 'http://') === 0 || stripos($resource, 'https://') === 0 || stripos($resource, '//') === 0) {
+            return array($resource);
+        }
+
+        // check if asset from web dir
+        if (stripos($resource, '@') === 0) {
+            $pattern = ltrim(mb_substr($resource, 1), DS);
+            $webDirLength = mb_strlen($this->_webDir);
+
+            $files = FilesystemUtils::glob($this->_webDir . $pattern, GLOB_NOCHECK | GLOB_BRACE);
+            $resources = array();
+            foreach($files as $file) {
+                $resources[] = '@/'. mb_substr($file, $webDirLength);
+            }
+
+            return $resources;
+        }
+
+        list($moduleName, $subDir, $filePattern) = explode(':', $resource);
+        list($resource, $type) = $this->transformSubdir($resource, $type);
+        $type = !empty($type) ? DS . trim($type, DS) : $type;
+
+        // delegate this task to resource finder
+        $resources = $this->_finder->expand($resource, 'public'. $type);
+
+        // we need to fix the sub dir there
+        if (!empty($subDir)) {
+            foreach($resources as $i => $resource) {
+                $resources[$i] = str_replace('::', ':'. $subDir .':', $resource);
+            }
+        }
+
+        return $resources;
     }
 
     /*****************************************

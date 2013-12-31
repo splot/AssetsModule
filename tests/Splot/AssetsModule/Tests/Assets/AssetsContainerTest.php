@@ -72,6 +72,17 @@ class AssetsContainerTest extends TestCase
         $this->assertCount($count, $container->getAssets());
     }
 
+    public function testAddingGlobAssetsStructure() {
+        $mocks = $this->provideMocks();
+        $mocks['type'] = 'js';
+        $container = $this->provideAssetsContainer($mocks);
+
+        $result = $container->addAsset('@/js/*.js');
+        $asset = $result[0];
+        $this->assertInternalType('string', $asset['path']);
+        $this->assertInternalType('string', $asset['url']);
+    }
+
     /**
      * @covers ::getSortedAssets()
      * @covers ::sortAssets()
@@ -130,8 +141,8 @@ class AssetsContainerTest extends TestCase
 
         $this->assertEquals(array(
             'lib' => array('http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'),
-            'app' => array('::index.js', 'SplotAssetsTestModule::overwritten.js', 'SplotAssetsTestModule::**/*.js', 'SplotAssetsTestModule::**/*.js'),
-            'page' => array('SplotAssetsTestModule::lipsum.js', 'SplotAssetsTestModule::adipiscit.js', '@/js/*.js', '@/js/*.js', '@/js/*.js', '@/js/lib/jquery.min.js'),
+            'app' => array('::index.js', 'SplotAssetsTestModule::overwritten.js', 'SplotAssetsTestModule::Lorem/Dolor/sit.js', 'SplotAssetsTestModule::Lorem/ipsum.js'),
+            'page' => array('SplotAssetsTestModule::lipsum.js', 'SplotAssetsTestModule::adipiscit.js', '@/js/contact.js', '@/js/index.js', '@/js/map.js', '@/js/lib/jquery.min.js'),
             'custom' => array('@/js/contact.js', '@/js/map.js')
         ), $parsedNewOrder);
     }

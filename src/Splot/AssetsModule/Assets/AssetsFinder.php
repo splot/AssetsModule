@@ -12,6 +12,7 @@
 namespace Splot\AssetsModule\Assets;
 
 use MD\Foundation\Exceptions\InvalidArgumentException;
+use MD\Foundation\Utils\FilesystemUtils;
 
 use Splot\Framework\Application\AbstractApplication;
 use Splot\Framework\Resources\Finder;
@@ -210,7 +211,7 @@ class AssetsFinder
         // check if asset from web dir
         if (stripos($resource, '@') === 0) {
             $path = $this->_webDir . ltrim(substr($resource, 1), '/');
-            $files = glob($path, GLOB_NOCHECK | GLOB_BRACE);
+            $files = FilesystemUtils::glob($path, GLOB_NOCHECK | GLOB_BRACE);
 
             if ($files) {
                 // if glob returned more than one file then just return it - it wouldn't return nonexistent files

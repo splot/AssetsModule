@@ -174,6 +174,10 @@ class AssetsFinderTest extends TestCase
                 '@/js/index.js',
                 '@/js/map.js'
             )),
+            array('SplotAssetsTestModule::Lorem/*.js', array(
+                'SplotAssetsTestModule::Lorem/ipsum.js'
+            )),
+            array('@/img/*.png', array()),
             array('SplotAssetsTestModule::*.js', array(
                 'SplotAssetsTestModule::overwrite.js',
                 'SplotAssetsTestModule::overwritten.js',

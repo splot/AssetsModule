@@ -227,7 +227,7 @@ class AssetsFinder
             $pattern = ltrim(mb_substr($resource, 1), DS);
             $webDirLength = mb_strlen($this->_webDir);
 
-            $files = FilesystemUtils::glob($this->_webDir . $pattern, GLOB_NOCHECK | GLOB_BRACE);
+            $files = FilesystemUtils::glob($this->_webDir . $pattern, GLOB_BRACE);
             $resources = array();
             foreach($files as $file) {
                 $resources[] = '@/'. mb_substr($file, $webDirLength);

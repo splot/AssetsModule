@@ -174,18 +174,32 @@ class AssetsFinderTest extends TestCase
                 '@/js/index.js',
                 '@/js/map.js'
             )),
+            array('@/js/{,**/}*.js', array(
+                '@/js/contact.js',
+                '@/js/index.js',
+                '@/js/map.js',
+                '@/js/lib/jquery.min.js'
+            )),
             array('SplotAssetsTestModule::Lorem/*.js', array(
                 'SplotAssetsTestModule::Lorem/ipsum.js'
             )),
             array('@/img/*.png', array()),
             array('SplotAssetsTestModule::*.js', array(
-                'SplotAssetsTestModule::overwrite.js',
-                'SplotAssetsTestModule::overwritten.js',
                 'SplotAssetsTestModule::adipiscit.js',
                 'SplotAssetsTestModule::lipsum.js',
                 'SplotAssetsTestModule::lorem.js',
+                'SplotAssetsTestModule::overwrite.js',
+                'SplotAssetsTestModule::overwritten.js',
             )),
-
+        array('SplotAssetsTestModule::{,**/}*.js', array(
+                'SplotAssetsTestModule::adipiscit.js',
+                'SplotAssetsTestModule::lipsum.js',
+                'SplotAssetsTestModule::lorem.js',
+                'SplotAssetsTestModule::overwrite.js',
+                'SplotAssetsTestModule::overwritten.js',
+                'SplotAssetsTestModule::Lorem/ipsum.js',
+                'SplotAssetsTestModule::Lorem/Dolor/sit.js',
+            )),
         );
     }
 

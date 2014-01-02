@@ -141,7 +141,7 @@ class AssetsContainerTest extends TestCase
 
         $this->assertEquals(array(
             'lib' => array('http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'),
-            'app' => array('::index.js', 'SplotAssetsTestModule::overwritten.js', 'SplotAssetsTestModule::Lorem/Dolor/sit.js', 'SplotAssetsTestModule::Lorem/ipsum.js'),
+            'app' => array('::index.js', 'SplotAssetsTestModule::overwritten.js', 'SplotAssetsTestModule::Lorem/ipsum.js', 'SplotAssetsTestModule::Lorem/Dolor/sit.js'),
             'page' => array('SplotAssetsTestModule::lipsum.js', 'SplotAssetsTestModule::adipiscit.js', '@/js/contact.js', '@/js/index.js', '@/js/map.js', '@/js/lib/jquery.min.js'),
             'custom' => array('@/js/contact.js', '@/js/map.js')
         ), $parsedNewOrder);

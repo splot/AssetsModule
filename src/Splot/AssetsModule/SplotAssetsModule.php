@@ -60,16 +60,9 @@ class SplotAssetsModule extends AbstractModule
             $injector->injectAssetsOnResponse($event);
         }, -9999);
 
-        /*
-         * OTHER
-         */
-        $this->registerTwigExtension();
     }
 
-    /**
-     * Registers Twig extension for assets management.
-     */
-    public function registerTwigExtension() {
+    public function run() {
         if ($this->container->has('twig')) {
             $extension = new AssetsExtension(
                 $this->container->get('assets_finder'),

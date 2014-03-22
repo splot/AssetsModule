@@ -24,13 +24,13 @@ class JavaScriptContainerTest extends ApplicationTestCase
 
         // first add few assets
         $container->addAsset('http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', 'lib', 99999);
-        $container->addAsset('@/js/lib/jquery.min.js', 'page', -10);
-        $container->addAsset('@/js/map.js', 'custom', -10);
-        $container->addAsset('SplotAssetsTestModule::adipiscit.js');
-        $container->addAsset('SplotAssetsTestModule::lipsum.js', 'page', 9999);
-        $container->addAsset('SplotAssetsTestModule::overwritten.js', 'app');
-        $container->addAsset('::index.js', 'app', 80);
-        $container->addAsset('@/js/contact.js', 'custom');
+        $container->addAsset('/js/lib/jquery.min.js', 'page', -10);
+        $container->addAsset('/js/map.js', 'custom', -10);
+        $container->addAsset('@SplotAssetsTestModule::adipiscit.js');
+        $container->addAsset('@SplotAssetsTestModule::lipsum.js', 'page', 9999);
+        $container->addAsset('@SplotAssetsTestModule::overwritten.js', 'app');
+        $container->addAsset('@::index.js', 'app', 80);
+        $container->addAsset('/js/contact.js', 'custom');
 
         $this->assertEquals('<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" data-package="lib"></script>
 <script type="text/javascript" src="/app/js/index.js" data-package="app"></script>

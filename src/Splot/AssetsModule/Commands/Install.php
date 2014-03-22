@@ -29,7 +29,7 @@ class Install extends AbstractCommand
         $overwrittenAssetsDir = $webDir . $config->get('overwritten_dir');
 
         // install global application assets
-        $this->installApplicationAssets($application->getApplicationDir(), $applicationAssetsDir);
+        $this->installApplicationAssets($this->getParameter('application_dir'), $applicationAssetsDir);
 
         // install assets for all modules
         $modules = $application->getModules();
@@ -37,7 +37,7 @@ class Install extends AbstractCommand
             $this->installModuleAssets($module, $moduleAssetsDir);
 
             // also install overwritten assets dirs
-            $this->installOverwrittenModuleAssets($module, $application->getApplicationDir(), $overwrittenAssetsDir);
+            $this->installOverwrittenModuleAssets($module, $this->getParameter('application_dir'), $overwrittenAssetsDir);
         }
 
         $this->writeln('Done.');

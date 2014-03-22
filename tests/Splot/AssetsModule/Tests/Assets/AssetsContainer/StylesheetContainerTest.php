@@ -23,10 +23,10 @@ class StylesheetContainerTest extends ApplicationTestCase
         $container = $this->provideStylesheetContainer();
 
         // first add few assets
-        $container->addAsset('::app.css', 'app');
-        $container->addAsset('SplotAssetsTestModule::overwrite.css', 'lib');
-        $container->addAsset('SplotAssetsTestModule::test.css');
-        $container->addAsset('@/css/web.css', 'app');
+        $container->addAsset('@::app.css', 'app');
+        $container->addAsset('@SplotAssetsTestModule::overwrite.css', 'lib');
+        $container->addAsset('@SplotAssetsTestModule::test.css');
+        $container->addAsset('/css/web.css', 'app');
 
         $this->assertEquals('<link rel="stylesheet" href="/custom/splotassetstest/css/overwrite.css" data-package="lib">
 <link rel="stylesheet" href="/app/css/app.css" data-package="app">

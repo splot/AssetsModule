@@ -66,7 +66,7 @@ class AssetsContainerTest extends ApplicationTestCase
         $mocks['type'] = 'js';
         $container = $this->provideAssetsContainer($mocks);
 
-        $result = $container->addAsset('@/js/*.js');
+        $result = $container->addAsset('/js/*.js');
         $asset = $result[0];
         $this->assertInternalType('string', $asset['path']);
         $this->assertInternalType('string', $asset['url']);
@@ -83,13 +83,13 @@ class AssetsContainerTest extends ApplicationTestCase
 
         // first add few assets
         $container->addAsset('http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', 'lib', 99999);
-        $container->addAsset('@/js/lib/jquery.min.js', 'page', -10);
-        $container->addAsset('@/js/map.js', 'custom', -10);
-        $container->addAsset('SplotAssetsTestModule::adipiscit.js');
-        $container->addAsset('SplotAssetsTestModule::lipsum.js', 'page', 9999);
-        $container->addAsset('SplotAssetsTestModule::overwritten.js', 'app');
-        $container->addAsset('::index.js', 'app', 80);
-        $container->addAsset('@/js/contact.js', 'custom');
+        $container->addAsset('/js/lib/jquery.min.js', 'page', -10);
+        $container->addAsset('/js/map.js', 'custom', -10);
+        $container->addAsset('@SplotAssetsTestModule::adipiscit.js');
+        $container->addAsset('@SplotAssetsTestModule::lipsum.js', 'page', 9999);
+        $container->addAsset('@SplotAssetsTestModule::overwritten.js', 'app');
+        $container->addAsset('@::index.js', 'app', 80);
+        $container->addAsset('/js/contact.js', 'custom');
 
         // then get the order
         $order = $container->getSortedAssets();
@@ -104,17 +104,17 @@ class AssetsContainerTest extends ApplicationTestCase
 
         $this->assertEquals(array(
             'lib' => array('http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'),
-            'app' => array('::index.js', 'SplotAssetsTestModule::overwritten.js'),
-            'page' => array('SplotAssetsTestModule::lipsum.js', 'SplotAssetsTestModule::adipiscit.js', '@/js/lib/jquery.min.js'),
-            'custom' => array('@/js/contact.js', '@/js/map.js')
+            'app' => array('@::index.js', '@SplotAssetsTestModule::overwritten.js'),
+            'page' => array('@SplotAssetsTestModule::lipsum.js', '@SplotAssetsTestModule::adipiscit.js', '/js/lib/jquery.min.js'),
+            'custom' => array('/js/contact.js', '/js/map.js')
         ), $parsedOrder);
 
         // get the order again to make sure it's the same (and cover memory cache)
         $this->assertEquals($order, $container->getSortedAssets());
         
         // add few more assets
-        $container->addAsset('@/js/*.js', 'page');
-        $container->addAsset('SplotAssetsTestModule::**/*.js', 'app');
+        $container->addAsset('/js/*.js', 'page');
+        $container->addAsset('@SplotAssetsTestModule::**/*.js', 'app');
 
         // get new order and make sure it's different than the original one (to test that adding new assets resets the ordering)
         $newOrder = $container->getSortedAssets();
@@ -130,9 +130,9 @@ class AssetsContainerTest extends ApplicationTestCase
 
         $this->assertEquals(array(
             'lib' => array('http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'),
-            'app' => array('::index.js', 'SplotAssetsTestModule::overwritten.js', 'SplotAssetsTestModule::Lorem/ipsum.js', 'SplotAssetsTestModule::Lorem/Dolor/sit.js'),
-            'page' => array('SplotAssetsTestModule::lipsum.js', 'SplotAssetsTestModule::adipiscit.js', '@/js/contact.js', '@/js/index.js', '@/js/map.js', '@/js/lib/jquery.min.js'),
-            'custom' => array('@/js/contact.js', '@/js/map.js')
+            'app' => array('@::index.js', '@SplotAssetsTestModule::overwritten.js', '@SplotAssetsTestModule::Lorem/ipsum.js', '@SplotAssetsTestModule::Lorem/Dolor/sit.js'),
+            'page' => array('@SplotAssetsTestModule::lipsum.js', '@SplotAssetsTestModule::adipiscit.js', '/js/contact.js', '/js/index.js', '/js/map.js', '/js/lib/jquery.min.js'),
+            'custom' => array('/js/contact.js', '/js/map.js')
         ), $parsedNewOrder);
     }
 
@@ -192,9 +192,9 @@ class AssetsContainerTest extends ApplicationTestCase
                 ),
             ),
             array(
-                array('SplotAssetsTestModule::adipiscit.js', 'app', 10),
+                array('@SplotAssetsTestModule::adipiscit.js', 'app', 10),
                 array(
-                    'resource' => 'SplotAssetsTestModule::adipiscit.js',
+                    'resource' => '@SplotAssetsTestModule::adipiscit.js',
                     'package' => 'app',
                     'priority' => 10,
                     'path' => $testModulePath .'js/adipiscit.js',
@@ -202,9 +202,9 @@ class AssetsContainerTest extends ApplicationTestCase
                 )
             ),
             array(
-                array('SplotAssetsTestModule:Lorem:Dolor/sit.js', 'lib', -80),
+                array('@SplotAssetsTestModule:Lorem:Dolor/sit.js', 'lib', -80),
                 array(
-                    'resource' => 'SplotAssetsTestModule:Lorem:Dolor/sit.js',
+                    'resource' => '@SplotAssetsTestModule:Lorem:Dolor/sit.js',
                     'package' => 'lib',
                     'priority' => -80,
                     'path' => $testModulePath .'Lorem/js/Dolor/sit.js',
@@ -212,9 +212,9 @@ class AssetsContainerTest extends ApplicationTestCase
                 )
             ),
             array(
-                array('::index.js', 'custom'),
+                array('@::index.js', 'custom'),
                 array(
-                    'resource' => '::index.js',
+                    'resource' => '@::index.js',
                     'package' => 'custom',
                     'priority' => 0,
                     'path' => $appPath .'Resources/public/js/index.js',
@@ -222,9 +222,9 @@ class AssetsContainerTest extends ApplicationTestCase
                 )
             ),
             array(
-                array('@/js/lib/jquery.min.js', 'vendor'),
+                array('/js/lib/jquery.min.js', 'vendor'),
                 array(
-                    'resource' => '@/js/lib/jquery.min.js',
+                    'resource' => '/js/lib/jquery.min.js',
                     'package' => 'vendor',
                     'priority' => 0,
                     'path' => $webPath .'js/lib/jquery.min.js',
@@ -236,10 +236,10 @@ class AssetsContainerTest extends ApplicationTestCase
 
     public function provideGlobAssets() {
         return array(
-            array('::index.js', 1),
-            array('@/js/*.js', 3),
-            array('SplotAssetsTestModule::*.js', 5),
-            array('SplotAssetsTestModule::**/*.js', 2)
+            array('@::index.js', 1),
+            array('/js/*.js', 3),
+            array('@SplotAssetsTestModule::*.js', 5),
+            array('@SplotAssetsTestModule::**/*.js', 2)
         );
     }
 

@@ -130,12 +130,15 @@ class AssetsFinder
             throw new ResourceNotFoundException('Could not find asset "'. $resource .'".'); // rethrow with a different message
         }
 
-        // check if asset from web dir
-        if (stripos($resource, '@') === 0) {
+        // if asset is not a module resource then try it in web dir
+        if (stripos($resource, '@') !== 0) {
             $url = '/'. mb_substr($file, mb_strlen($this->_webDir));
             $this->_urlCache[$cacheKey] = $url;
             return $url;
         }
+
+        // remove the @ from the resource name
+        $resource = mb_substr($resource, 1);
 
         // adjust and parse the resource name
         list($resource, $type) = $this->transformSubdir($resource, $type);
@@ -187,9 +190,9 @@ class AssetsFinder
             return $resource;
         }
 
-        // check if asset from web dir
-        if (stripos($resource, '@') === 0) {
-            $path = $this->_webDir . ltrim(mb_substr($resource, 1), DS);
+        // if asset is not a module resource then try it in web dir
+        if (stripos($resource, '@') !== 0) {
+            $path = $this->_webDir . ltrim($resource, DS);
 
             if (!file_exists($path)) {
                 throw new ResourceNotFoundException('Resource "'. $resource .'" not found in web dir.');
@@ -198,6 +201,9 @@ class AssetsFinder
             $this->_pathsCache[$cacheKey] = $path;
             return $path;
         }
+
+        // remove the @ from the resource name
+        $resource = mb_substr($resource, 1);
 
         list($resource, $type) = $this->transformSubdir($resource, $type);
         $type = !empty($type) ? DS . trim($type, DS) : $type;
@@ -222,19 +228,22 @@ class AssetsFinder
             return array($resource);
         }
 
-        // check if asset from web dir
-        if (stripos($resource, '@') === 0) {
-            $pattern = ltrim(mb_substr($resource, 1), DS);
+        // if asset is not a module resource then try it in web dir
+        if (stripos($resource, '@') !== 0) {
+            $pattern = ltrim($resource, DS);
             $webDirLength = mb_strlen($this->_webDir);
 
             $files = FilesystemUtils::glob($this->_webDir . $pattern, FilesystemUtils::GLOB_ROOTFIRST | GLOB_BRACE);
             $resources = array();
             foreach($files as $file) {
-                $resources[] = '@/'. mb_substr($file, $webDirLength);
+                $resources[] = '/'. mb_substr($file, $webDirLength);
             }
 
             return $resources;
         }
+
+        // remove the @ from the resource name
+        $resource = mb_substr($resource, 1);
 
         list($moduleName, $subDir, $filePattern) = explode(':', $resource);
         list($resource, $type) = $this->transformSubdir($resource, $type);
@@ -242,6 +251,10 @@ class AssetsFinder
 
         // delegate this task to resource finder
         $resources = $this->_finder->expand($resource, 'public'. $type);
+
+        $resources = array_map(function($resource) {
+            return '@'. $resource;
+        }, $resources);
 
         // we need to fix the sub dir there
         if (!empty($subDir)) {

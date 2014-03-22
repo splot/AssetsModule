@@ -13,7 +13,12 @@
         "php": ">=5.3.3",
         "symfony/filesystem": "dev-master",
         "michaldudek/foundation": "dev-master",
-        "splot/framework": "dev-master"
+        "splot/framework": "0.5.*"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-release/0.5-alpha": "0.5.x-dev"
+        }
     },
     "minimum-stability": "dev",
     "autoload": {

@@ -1,25 +1,14 @@
 <?php
 namespace Splot\AssetsModule\Tests\Assets;
 
-use Splot\Framework\Testing\TestCase;
+use Splot\Framework\Testing\ApplicationTestCase;
 
 use Splot\AssetsModule\Assets\AssetsFinder;
 
-use Splot\AssetsModule\Tests\Assets\Stubs\AssetsTestModule\SplotAssetsTestModule;
-
-class AssetsFinderTest extends TestCase
+class AssetsFinderTest extends ApplicationTestCase
 {
 
-    public function setUp() {
-        $basePath = rtrim(__DIR__, DS) . DS . 'Stubs/';
-
-        $this->_options = array(
-            'applicationDir' => $basePath .'app/',
-            'webDir' => $basePath .'web/'
-        );
-        parent::setUp();
-        $this->_application->bootModule(new SplotAssetsTestModule());
-    }
+    public static $_applicationClass = 'Splot\AssetsModule\Tests\Assets\Stubs\TestApplication';
 
     /**
      * @dataProvider provideAssetsWithUrls

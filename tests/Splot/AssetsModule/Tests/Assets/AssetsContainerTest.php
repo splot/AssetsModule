@@ -3,29 +3,18 @@ namespace Splot\AssetsModule\Tests\Assets;
 
 use MD\Foundation\Utils\ArrayUtils;
 
-use Splot\Framework\Testing\TestCase;
+use Splot\Framework\Testing\ApplicationTestCase;
 
 use Splot\AssetsModule\Assets\AssetsContainer;
 use Splot\AssetsModule\Assets\AssetsFinder;
 
-use Splot\AssetsModule\Tests\Assets\Stubs\AssetsTestModule\SplotAssetsTestModule;
-
 /**
  * @coversDefaultClass \Splot\AssetsModule\Assets\AssetsContainer
  */
-class AssetsContainerTest extends TestCase
+class AssetsContainerTest extends ApplicationTestCase
 {
 
-    public function setUp() {
-        $basePath = rtrim(__DIR__, '/') .'/' . 'Stubs/';
-
-        $this->_options = array(
-            'applicationDir' => $basePath .'app/',
-            'webDir' => $basePath .'web/'
-        );
-        parent::setUp();
-        $this->_application->bootModule(new SplotAssetsTestModule());
-    }
+    public static $_applicationClass = 'Splot\AssetsModule\Tests\Assets\Stubs\TestApplication';
 
     /**
      * @covers ::__construct()

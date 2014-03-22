@@ -6,7 +6,6 @@ use Splot\Framework\Modules\AbstractModule;
 class SplotAssetsTestModule extends AbstractModule
 {
 
-    public function boot() {
-    }
+
 
 }

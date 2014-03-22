@@ -1,29 +1,18 @@
 <?php
 namespace Splot\AssetsModule\Tests\Assets\AssetsContainer;
 
-use Splot\Framework\Testing\TestCase;
+use Splot\Framework\Testing\ApplicationTestCase;
 
 use Splot\AssetsModule\Assets\AssetsContainer\JavaScriptContainer;
 use Splot\AssetsModule\Assets\AssetsFinder;
 
-use Splot\AssetsModule\Tests\Assets\Stubs\AssetsTestModule\SplotAssetsTestModule;
-
 /**
  * @coversDefaultClass \Splot\AssetsModule\Assets\AssetsContainer\JavaScriptContainer
  */
-class JavaScriptContainerTest extends TestCase
+class JavaScriptContainerTest extends ApplicationTestCase
 {
 
-    public function setUp() {
-        $basePath = rtrim(realpath(__DIR__) .'/../', '/') .'/' . 'Stubs/';
-
-        $this->_options = array(
-            'applicationDir' => $basePath .'app/',
-            'webDir' => $basePath .'web/'
-        );
-        parent::setUp();
-        $this->_application->bootModule(new SplotAssetsTestModule());
-    }
+    public static $_applicationClass = 'Splot\AssetsModule\Tests\Assets\Stubs\TestApplication';
 
     public function testType() {
         $container = $this->provideJavaScriptContainer();

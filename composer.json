@@ -1,7 +1,7 @@
 {
     "name": "splot/assets-module",
     "description": "Assets manager module for Splot Framework.",
-    "keywords": ["splot", "module", "assets", "js", "css"],
+    "keywords": ["assets", "js", "css", "minify", "uglify"],
     "license": "MIT",
     "authors": [
         {
@@ -11,9 +11,16 @@
     ],
      "require": {
         "php": ">=5.3.3",
-        "symfony/filesystem": "dev-master",
         "michaldudek/foundation": "dev-master",
-        "splot/framework": "dev-master"
+        "splot/framework": ">=0.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.6.x-dev"
+        }
     },
     "minimum-stability": "dev",
     "autoload": {

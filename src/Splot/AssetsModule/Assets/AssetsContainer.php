@@ -13,12 +13,17 @@ namespace Splot\AssetsModule\Assets;
 
 use MD\Foundation\Debug\Debugger;
 use MD\Foundation\Utils\ArrayUtils;
+use MD\Foundation\Utils\ObjectUtils;
 use MD\Foundation\Utils\StringUtils;
 
+use Splot\AssetsModule\Assets\Asset;
 use Splot\AssetsModule\Assets\AssetsFinder;
+use Splot\AssetsModule\Minifier\Minifier;
 
 abstract class AssetsContainer
 {
+
+    const DEFAULT_PACKAGE = 'page';
 
     /**
      * Assets type for this container.
@@ -55,7 +60,7 @@ abstract class AssetsContainer
      * 
      * @var array
      */
-    protected $_packages = array('lib', 'app', 'page');
+    protected $_packages = array('lib', 'app', self::DEFAULT_PACKAGE);
 
     /**
      * Assets finder service.
@@ -65,13 +70,31 @@ abstract class AssetsContainer
     protected $_finder;
 
     /**
+     * Asset minifier.
+     * 
+     * @var Minifier
+     */
+    protected $_minifier;
+
+    /**
+     * Should minify assets?
+     * 
+     * @var boolean
+     */
+    protected $_minify = false;
+
+    /**
      * Constructor.
      * 
      * @param AssetsFinder $finder Assets finder service.
+     * @param Minifier $minfier Assets minifier appropriate for the type of the container (js/css).
+     * @param boolean $minify [optional] Should assets be minified when printing them out? Default: false.
      * @param string $type Type of assets (for resolving their paths and URL's).
      */
-    public function __construct(AssetsFinder $finder, $type = null) {
+    public function __construct(AssetsFinder $finder, Minifier $minifier, $minify = false, $type = null) {
         $this->_finder = $finder;
+        $this->_minifier = $minifier;
+        $this->_minify = $minify;
 
         if ($type) {
             $this->_type = $type;
@@ -94,23 +117,27 @@ abstract class AssetsContainer
      * Returns an array collection of added assets and their data.
      * 
      * @param string $resource Resource link to the asset.
-     * @param string $package [optional] Package name for this asset. Default: 'page'.
+     * @param string $package [optional] Package name for this asset. Default: self::DEFAULT_PACKAGE.
      * @param int $priority [optional] Priority of this asset. The higher it is, the earlier in the output it will be embedded. Default: 0.
      * @return array
      */
-    public function addAsset($resource, $package = 'page', $priority = 0) {
+    public function addAsset($resource, $package = self::DEFAULT_PACKAGE, $priority = 0, array $options = array()) {
         $resources = $this->_finder->expand($resource, $this->_type);
 
         $assets = array();
 
-        foreach($resources as $asset) {
-            $assets[] = array(
-                'resource' => $asset,
-                'package' => $package,
-                'priority' => $priority,
-                'path' => $this->_finder->getAssetPath($asset, $this->_type),
-                'url' => $this->_finder->getAssetUrl($asset, $this->_type)
+        foreach($resources as $resource) {
+            $asset = new Asset(
+                $resource,
+                $this->_finder->getAssetPath($resource, $this->_type),
+                $this->_finder->getAssetUrl($resource, $this->_type),
+                $package,
+                $priority
             );
+            
+            $asset->setMinify(isset($options['minify']) ? $options['minify'] : $this->_minify);
+
+            $assets[] = $asset;
         }
 
         $this->_assets = array_merge($this->_assets, $assets);
@@ -134,10 +161,10 @@ abstract class AssetsContainer
         $this->_sortedAssets = array();
 
         // sort all assets by priority
-        $sortedAssets = ArrayUtils::multiSort($this->_assets, 'priority', true);
+        $sortedAssets = ObjectUtils::multiSort($this->_assets, 'priority', true);
 
         // group them by packages
-        $packagedAssets = ArrayUtils::groupBy($sortedAssets, 'package');
+        $packagedAssets = ObjectUtils::groupBy($sortedAssets, 'package');
 
         // now add the standard packages in correct order
         foreach($this->_packages as $name) {

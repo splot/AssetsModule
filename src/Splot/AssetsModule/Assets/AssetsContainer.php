@@ -87,14 +87,10 @@ abstract class AssetsContainer
      * Constructor.
      * 
      * @param AssetsFinder $finder Assets finder service.
-     * @param Minifier $minfier Assets minifier appropriate for the type of the container (js/css).
-     * @param boolean $minify [optional] Should assets be minified when printing them out? Default: false.
      * @param string $type Type of assets (for resolving their paths and URL's).
      */
-    public function __construct(AssetsFinder $finder, Minifier $minifier, $minify = false, $type = null) {
+    public function __construct(AssetsFinder $finder, $type = null) {
         $this->_finder = $finder;
-        $this->_minifier = $minifier;
-        $this->_minify = $minify;
 
         if ($type) {
             $this->_type = $type;

@@ -2,6 +2,7 @@
 namespace Splot\AssetsModule\Tests\Assets;
 
 use MD\Foundation\Utils\ArrayUtils;
+use MD\Foundation\Utils\ObjectUtils;
 
 use Splot\Framework\Testing\ApplicationTestCase;
 
@@ -43,7 +44,13 @@ class AssetsContainerTest extends ApplicationTestCase
         $this->assertCount(1, $result);
         $this->assertCount(1, $container->getAssets());
 
-        $this->assertEquals($expected, $result[0]);
+        $added = $result[0];
+        $this->assertInstanceOf('Splot\AssetsModule\Assets\Asset', $added);
+        $this->assertEquals($expected['resource'], $added->getResource());
+        $this->assertEquals($expected['package'], $added->getPackage());
+        $this->assertEquals($expected['priority'], $added->getPriority());
+        $this->assertEquals($expected['path'], $added->getPath());
+        $this->assertEquals($expected['url'], $added->getUrl());
     }
 
     /**
@@ -68,8 +75,8 @@ class AssetsContainerTest extends ApplicationTestCase
 
         $result = $container->addAsset('/js/*.js');
         $asset = $result[0];
-        $this->assertInternalType('string', $asset['path']);
-        $this->assertInternalType('string', $asset['url']);
+        $this->assertInternalType('string', $asset->getPath());
+        $this->assertInternalType('string', $asset->getUrl());
     }
 
     /**
@@ -99,7 +106,7 @@ class AssetsContainerTest extends ApplicationTestCase
 
         $parsedOrder = array();
         foreach($order as $package => $assets) {
-            $parsedOrder[$package] = ArrayUtils::pluck($assets, 'resource');
+            $parsedOrder[$package] = ObjectUtils::pluck($assets, 'resource');
         }
 
         $this->assertEquals(array(
@@ -125,7 +132,7 @@ class AssetsContainerTest extends ApplicationTestCase
 
         $parsedNewOrder = array();
         foreach($newOrder as $package => $assets) {
-            $parsedNewOrder[$package] = ArrayUtils::pluck($assets, 'resource');
+            $parsedNewOrder[$package] = ObjectUtils::pluck($assets, 'resource');
         }
 
         $this->assertEquals(array(

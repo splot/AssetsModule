@@ -42,14 +42,23 @@ class SplotAssetsModule extends AbstractModule
                 $config->get('overwritten_dir')
             );
         });
+        $container->set('assets.finder', function($c) {
+            return $c->get('assets_finder');
+        });
 
         // register assets containers services
         $container->set('javascripts', function($c) {
             return new JavaScriptContainer($c->get('assets_finder'));
         });
+        $container->set('assets.javascripts', function($c) {
+            return $c->get('javascripts');
+        });
 
         $container->set('stylesheets', function($c) {
             return new StylesheetContainer($c->get('assets_finder'));
+        });
+        $container->set('assets.stylesheets', function($c) {
+            return $c->get('stylesheets');
         });
 
         /*
@@ -65,9 +74,9 @@ class SplotAssetsModule extends AbstractModule
     public function run() {
         if ($this->container->has('twig')) {
             $extension = new AssetsExtension(
-                $this->container->get('assets_finder'),
-                $this->container->get('javascripts'),
-                $this->container->get('stylesheets')
+                $this->container->get('assets.finder'),
+                $this->container->get('assets.javascripts'),
+                $this->container->get('assets.stylesheets')
             );
             $this->container->get('twig')->addExtension($extension);
         }

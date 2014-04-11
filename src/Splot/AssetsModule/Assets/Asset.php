@@ -189,4 +189,13 @@ class Asset
         return $this->getRemote();
     }
 
+    /**
+     * Converts the asset to string by returning it's URL.
+     * 
+     * @return string
+     */
+    public function __toString() {
+        return $this->getUrl();
+    }
+
 }

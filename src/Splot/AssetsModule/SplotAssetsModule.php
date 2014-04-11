@@ -18,6 +18,10 @@ use Splot\AssetsModule\Assets\AssetsMinifier;
 use Splot\AssetsModule\Assets\AssetsContainer\JavaScriptContainer;
 use Splot\AssetsModule\Assets\AssetsContainer\StylesheetContainer;
 use Splot\AssetsModule\EventListener\InjectAssets;
+use Splot\AssetsModule\Minifier\Css\CssMin;
+use Splot\AssetsModule\Minifier\JavaScript\JSqueeze;
+use Splot\AssetsModule\Minifier\JavaScript\UglifyJs2;
+use Splot\AssetsModule\Minifier\NullMinifier;
 use Splot\AssetsModule\Twig\Extension\AssetsExtension;
 
 class SplotAssetsModule extends AbstractModule
@@ -47,13 +51,26 @@ class SplotAssetsModule extends AbstractModule
             return $c->get('assets_finder');
         });
 
-        // register minifiers
+        // configures all possible minifiers that are distributed in this module
+        $this->configureMinifiers();
+
+        // register asset minifiers
         $container->set('assets.minifier.css', function($c) use ($config) {
-            return new AssetsMinifier($c->getParameter('web_dir'), $config->get('minifier.css_dir'), 'css');
+            return new AssetsMinifier(
+                $c->get($config->get('minifier.css_minifier')),
+                $c->getParameter('web_dir'),
+                $config->get('minifier.css_dir'),
+                'css'
+            );
         });
 
         $container->set('assets.minifier.javascript', function($c) use ($config) {
-            return new AssetsMinifier($c->getParameter('web_dir'), $config->get('minifier.js_dir'), 'js');
+            return new AssetsMinifier(
+                $c->get($config->get('minifier.js_minifier')),
+                $c->getParameter('web_dir'),
+                $config->get('minifier.js_dir'),
+                'js'
+            );
         });
 
         // register assets containers services
@@ -98,6 +115,29 @@ class SplotAssetsModule extends AbstractModule
             );
             $this->container->get('twig')->addExtension($extension);
         }
+    }
+
+    protected function configureMinifiers() {
+        $config = $this->getConfig();
+
+        $this->container->set('assets.minifiers.null', function($c) {
+            return new NullMinifier();
+        });
+
+        $this->container->set('assets.minifiers.cssmin', function($c) {
+            return new CssMin();
+        });
+
+        $this->container->set('assets.minifiers.jsqueeze', function($c) {
+            return new JSqueeze();
+        });
+
+        $this->container->set('assets.minifiers.uglifyjs2', function($c) use ($config) {
+            return new UglifyJs2(
+                $config->get('minifier.uglifyjs2.bin'),
+                $config->get('minifier.uglifyjs2.node_bin')
+            );
+        });
     }
 
 }

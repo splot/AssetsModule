@@ -7,7 +7,15 @@ return array(
     'minifier' => array(
         'css_enable' => false,
         'css_dir' => '/_min/css/',
+        'css_minifier' => 'assets.minifiers.cssmin',
         'js_enable' => false,
-        'js_dir' => '/_min/js/'
+        'js_dir' => '/_min/js/',
+        'js_minifier' => 'assets.minifiers.null',
+
+        // specific minifiers configuration
+        'uglifyjs2' => array(
+            'bin' => '/usr/local/bin/uglifyjs',
+            'node_bin' => '/usr/local/bin/node'
+        )
     )
 );

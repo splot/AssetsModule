@@ -13,9 +13,17 @@
 namespace Splot\AssetsModule\Assets;
 
 use Splot\AssetsModule\Assets\Asset;
+use Splot\AssetsModule\Assets\MinifierInterface;
 
 class AssetsMinifier
 {
+
+    /**
+     * Actual minifier that performs minification of an asset.
+     * 
+     * @var MinifierInterface
+     */
+    protected $minifier;
 
     /**
      * Application web dir.
@@ -47,12 +55,15 @@ class AssetsMinifier
 
     /**
      * Constructor.
-     * 
+     *
+     * @param MinifierInterface $minifier Actual minifier that performs minification of an asset.
+     *                                    This allows for dynamic configuration of used minifiers.
      * @param string $webDir        Application web dir.
      * @param string $baseUrl       Base URL at which the minified files should be located.
      * @param string $fileExtension File extension for combined assets file specific to the asset type, ie css/js.
      */
-    public function __construct($webDir, $baseUrl, $fileExtension) {
+    public function __construct(MinifierInterface $minifier, $webDir, $baseUrl, $fileExtension) {
+        $this->minifier = $minifier;
         $this->webDir = rtrim($webDir, '/') .'/';
         $this->baseUrl = '/'. trim($baseUrl, '/') .'/';
         $this->targetDir = $this->webDir . ltrim($this->baseUrl, '/');
@@ -145,10 +156,11 @@ class AssetsMinifier
             }
         }
         fclose($minFile);
-         
-        // and when concatenation is done, we also need to trigger its minification
-        // but we're gonna do it in a separate process to not slow down server response
         
+        // and now perform minification on that combined asset by delegating it
+        // to an injected minifier
+        // this allows for dynamic configuration of used minifiers
+        $this->minifier->minifyAsset($combinedAsset);
 
         // all done, return the combined asset reference
         return $combinedAsset;

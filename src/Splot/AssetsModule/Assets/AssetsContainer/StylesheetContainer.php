@@ -32,6 +32,11 @@ class StylesheetContainer extends AssetsContainer
         $output = '';
 
         foreach($this->getSortedAssets() as $package => $assets) {
+            // if minification enabled then replace the assets with minified ones
+            if ($this->_minify) {
+                $assets = $this->_minifier->minify($assets, $package);
+            }
+            
             foreach($assets as $asset) {
                 $output .= '<link rel="stylesheet" href="'. $asset->getUrl() .'" data-package="'. $package .'">'. NL;
             }

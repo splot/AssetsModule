@@ -18,7 +18,7 @@ use MD\Foundation\Utils\StringUtils;
 
 use Splot\AssetsModule\Assets\Asset;
 use Splot\AssetsModule\Assets\AssetsFinder;
-use Splot\AssetsModule\Minifier\Minifier;
+use Splot\AssetsModule\Assets\AssetsMinifier;
 
 abstract class AssetsContainer
 {
@@ -87,10 +87,14 @@ abstract class AssetsContainer
      * Constructor.
      * 
      * @param AssetsFinder $finder Assets finder service.
+     * @param AssetsMinifier $minfier Assets minifier appropriate for the type of the container (js/css).
+     * @param boolean $minify [optional] Should assets be minified when printing them out? Default: false.
      * @param string $type Type of assets (for resolving their paths and URL's).
      */
-    public function __construct(AssetsFinder $finder, $type = null) {
+    public function __construct(AssetsFinder $finder, AssetsMinifier $minifier, $minify = false, $type = null) {
         $this->_finder = $finder;
+        $this->_minifier = $minifier;
+        $this->_minify = $minify;
 
         if ($type) {
             $this->_type = $type;

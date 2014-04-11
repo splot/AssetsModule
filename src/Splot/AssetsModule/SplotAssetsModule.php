@@ -14,6 +14,7 @@ use Splot\Framework\Modules\AbstractModule;
 use Splot\Framework\Events\WillSendResponse;
 
 use Splot\AssetsModule\Assets\AssetsFinder;
+use Splot\AssetsModule\Assets\AssetsMinifier;
 use Splot\AssetsModule\Assets\AssetsContainer\JavaScriptContainer;
 use Splot\AssetsModule\Assets\AssetsContainer\StylesheetContainer;
 use Splot\AssetsModule\EventListener\InjectAssets;
@@ -46,16 +47,33 @@ class SplotAssetsModule extends AbstractModule
             return $c->get('assets_finder');
         });
 
+        // register minifiers
+        $container->set('assets.minifier.css', function($c) use ($config) {
+            return new AssetsMinifier($c->getParameter('web_dir'), $config->get('minifier.css_dir'), 'css');
+        });
+
+        $container->set('assets.minifier.javascript', function($c) use ($config) {
+            return new AssetsMinifier($c->getParameter('web_dir'), $config->get('minifier.js_dir'), 'js');
+        });
+
         // register assets containers services
-        $container->set('javascripts', function($c) {
-            return new JavaScriptContainer($c->get('assets_finder'));
+        $container->set('javascripts', function($c) use ($config) {
+            return new JavaScriptContainer(
+                $c->get('assets.finder'),
+                $c->get('assets.minifier.javascript'),
+                $config->get('minifier.js_enable')
+            );
         });
         $container->set('assets.javascripts', function($c) {
             return $c->get('javascripts');
         });
 
-        $container->set('stylesheets', function($c) {
-            return new StylesheetContainer($c->get('assets_finder'));
+        $container->set('stylesheets', function($c) use ($config) {
+            return new StylesheetContainer(
+                $c->get('assets.finder'),
+                $c->get('assets.minifier.css'),
+                $config->get('minifier.css_enable')
+            );
         });
         $container->set('assets.stylesheets', function($c) {
             return $c->get('stylesheets');

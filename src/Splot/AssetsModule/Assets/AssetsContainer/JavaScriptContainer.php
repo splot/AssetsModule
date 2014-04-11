@@ -34,6 +34,11 @@ class JavaScriptContainer extends AssetsContainer
         $output = '';
 
         foreach($this->getSortedAssets() as $package => $assets) {
+            // if minification enabled then replace the assets with minified ones
+            if ($this->_minify) {
+                $assets = $this->_minifier->minify($assets, $package);
+            }
+
             foreach($assets as $asset) {
                 $output .= '<script type="text/javascript" src="'. $asset->getUrl() .'" data-package="'. $package .'"></script>'. NL;
             }

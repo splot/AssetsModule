@@ -59,6 +59,15 @@ class Asset
     protected $minify = false;
 
     /**
+     * Is this a remote asset (not stored in the local filesystem).
+     *
+     * This is checked automatically based on the resource name.
+     * 
+     * @var boolean
+     */
+    protected $remote = false;
+
+    /**
      * Constructor.
      * 
      * @param string  $resource Asset resource name.
@@ -74,6 +83,11 @@ class Asset
         $this->url = $url;
         $this->package = $package;
         $this->priority = $priority;
+
+        // determine if this is a remote asset or not
+        $this->remote = stripos($resource, 'http://') === 0 
+            || stripos($resource, 'https://') === 0
+            || stripos($resource, '//') === 0;
     }
 
     /**
@@ -155,6 +169,24 @@ class Asset
      */
     public function setMinify($minify) {
         $this->minify = $minify;
+    }
+
+    /**
+     * Returns whether this is a remote asset (not stored in the local filesystem).
+     * 
+     * @return boolean
+     */
+    public function getRemote() {
+        return $this->remote;
+    }
+
+    /**
+     * Returns whether this is a remote asset (not stored in the local filesystem).
+     * 
+     * @return boolean
+     */
+    public function isRemote() {
+        return $this->getRemote();
     }
 
 }

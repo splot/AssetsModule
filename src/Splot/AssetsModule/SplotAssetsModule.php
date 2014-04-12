@@ -22,6 +22,7 @@ use Splot\AssetsModule\Minifier\Css\CssMin;
 use Splot\AssetsModule\Minifier\JavaScript\JSqueeze;
 use Splot\AssetsModule\Minifier\JavaScript\UglifyJs2;
 use Splot\AssetsModule\Minifier\NullMinifier;
+use Splot\AssetsModule\Minifier\WorkerMinifier;
 use Splot\AssetsModule\Twig\Extension\AssetsExtension;
 
 class SplotAssetsModule extends AbstractModule
@@ -136,6 +137,20 @@ class SplotAssetsModule extends AbstractModule
             return new UglifyJs2(
                 $config->get('minifier.uglifyjs2.bin'),
                 $config->get('minifier.uglifyjs2.node_bin')
+            );
+        });
+
+        $this->container->set('assets.minifiers.worker.css', function($c) use ($config) {
+            return new WorkerMinifier(
+                $c->get('work_queue'),
+                $c->get($config->get('minifier.css_minifier_worker'))
+            );
+        });
+
+        $this->container->set('assets.minifiers.worker.js', function($c) use ($config) {
+            return new WorkerMinifier(
+                $c->get('work_queue'),
+                $c->get($config->get('minifier.js_minifier_worker'))
             );
         });
     }

@@ -179,6 +179,14 @@ abstract class AssetsContainer
         $this->_sortedAssets = array_merge($this->_sortedAssets, $packagedAssets);
     }
 
+    /**
+     * Removes all assets from the container.
+     */
+    public function clearAssets() {
+        $this->_assets = array();
+        $this->_sortedAssets = array();
+    }
+
     /*************************
      * SETTERS AND GETTERS
      *************************/

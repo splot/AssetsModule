@@ -68,11 +68,6 @@ class AssetsMinifier
         $this->baseUrl = '/'. trim($baseUrl, '/') .'/';
         $this->targetDir = $this->webDir . ltrim($this->baseUrl, '/');
         $this->fileExtension = $fileExtension;
-
-        // if the target dir does not exist then create it
-        if (!is_dir($this->targetDir)) {
-            mkdir($this->targetDir, 0775, true);
-        }
     }
 
     /**
@@ -84,6 +79,11 @@ class AssetsMinifier
      * @return array
      */
     public function minify(array $assets, $prefix = null) {
+        // if the target dir does not exist then create it
+        if (!is_dir($this->targetDir)) {
+            mkdir($this->targetDir, 0775, true);
+        }
+        
         $minified = array();
 
         $current = array();

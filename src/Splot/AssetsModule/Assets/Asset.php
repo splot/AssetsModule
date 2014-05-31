@@ -118,6 +118,15 @@ class Asset
     }
 
     /**
+     * Set a new URL for this asset.
+     * 
+     * @param string $url New URL for this asset.
+     */
+    public function setUrl($url) {
+        $this->url = $url;
+    }
+
+    /**
      * Returns the container package in which the asset is registered.
      * 
      * @return string

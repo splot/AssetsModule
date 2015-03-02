@@ -11,7 +11,7 @@
     ],
      "require": {
         "php": ">=5.3.3",
-        "michaldudek/foundation": "dev-master",
+        "michaldudek/foundation": ">0.9,<2.0",
         "splot/framework": ">=0.6",
         "kriswallsmith/assetic": "1.2.*@dev",
         "natxet/CssMin": "dev-master"

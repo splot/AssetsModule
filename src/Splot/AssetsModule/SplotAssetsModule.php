@@ -97,6 +97,14 @@ class SplotAssetsModule extends AbstractModule
             return $c->get('stylesheets');
         });
 
+        $container->set('assets.twig_extension', function($c) {
+            return new AssetsExtension(
+                $c->get('assets.finder'),
+                $c->get('assets.javascripts'),
+                $c->get('assets.stylesheets')
+            );
+        });
+
         /*
          * EVENT LISTENERS
          */
@@ -109,12 +117,7 @@ class SplotAssetsModule extends AbstractModule
 
     public function run() {
         if ($this->container->has('twig')) {
-            $extension = new AssetsExtension(
-                $this->container->get('assets.finder'),
-                $this->container->get('assets.javascripts'),
-                $this->container->get('assets.stylesheets')
-            );
-            $this->container->get('twig')->addExtension($extension);
+            $this->container->get('twig')->addExtension($this->container->get('assets.twig_extension'));
         }
     }
 

@@ -8,16 +8,16 @@ use Splot\AssetsModule\Assets\AssetsFinder;
 class AssetsFinderTest extends ApplicationTestCase
 {
 
-    public static $_applicationClass = 'Splot\AssetsModule\Tests\Assets\Stubs\TestApplication';
+    public static $applicationClass = 'Splot\AssetsModule\Tests\Assets\Stubs\TestApplication';
 
     /**
      * @dataProvider provideAssetsWithUrls
      */
     public function testGetAssetUrl($asset, $resolved) {
         $finder = new AssetsFinder(
-            $this->_application,
-            $this->_application->getContainer()->get('resource_finder'),
-            $this->_application->getContainer()->getParameter('web_dir'),
+            $this->application,
+            $this->application->getContainer()->get('resource_finder'),
+            $this->application->getContainer()->getParameter('web_dir'),
             'app',
             'assets',
             'custom'
@@ -34,9 +34,9 @@ class AssetsFinderTest extends ApplicationTestCase
      */
     public function testGetAssetUrlInvalid() {
          $finder = new AssetsFinder(
-            $this->_application,
-            $this->_application->getContainer()->get('resource_finder'),
-            $this->_application->getContainer()->getParameter('web_dir'),
+            $this->application,
+            $this->application->getContainer()->get('resource_finder'),
+            $this->application->getContainer()->getParameter('web_dir'),
             'app',
             'assets',
             'custom'
@@ -49,9 +49,9 @@ class AssetsFinderTest extends ApplicationTestCase
      */
     public function testGetAssetPathInvalid() {
         $finder = new AssetsFinder(
-            $this->_application,
-            $this->_application->getContainer()->get('resource_finder'),
-            $this->_application->getContainer()->getParameter('web_dir'),
+            $this->application,
+            $this->application->getContainer()->get('resource_finder'),
+            $this->application->getContainer()->getParameter('web_dir'),
             'app',
             'assets',
             'custom'
@@ -64,9 +64,9 @@ class AssetsFinderTest extends ApplicationTestCase
      */
     public function testGetWebAssetPathInvalid() {
         $finder = new AssetsFinder(
-            $this->_application,
-            $this->_application->getContainer()->get('resource_finder'),
-            $this->_application->getContainer()->getParameter('web_dir'),
+            $this->application,
+            $this->application->getContainer()->get('resource_finder'),
+            $this->application->getContainer()->getParameter('web_dir'),
             'app',
             'assets',
             'custom'
@@ -79,9 +79,9 @@ class AssetsFinderTest extends ApplicationTestCase
      */
     public function testGetAssetPath($asset, $path) {
         $finder = new AssetsFinder(
-            $this->_application,
-            $this->_application->getContainer()->get('resource_finder'),
-            $this->_application->getContainer()->getParameter('web_dir'),
+            $this->application,
+            $this->application->getContainer()->get('resource_finder'),
+            $this->application->getContainer()->getParameter('web_dir'),
             'app',
             'assets',
             'custom'
@@ -98,9 +98,9 @@ class AssetsFinderTest extends ApplicationTestCase
      */
     public function testExpanding($asset, array $found) {
         $finder = new AssetsFinder(
-            $this->_application,
-            $this->_application->getContainer()->get('resource_finder'),
-            $this->_application->getContainer()->getParameter('web_dir'),
+            $this->application,
+            $this->application->getContainer()->get('resource_finder'),
+            $this->application->getContainer()->getParameter('web_dir'),
             'app',
             'assets',
             'custom'

@@ -15,7 +15,7 @@ use Splot\AssetsModule\Assets\AssetsFinder;
 class AssetsContainerTest extends ApplicationTestCase
 {
 
-    public static $_applicationClass = 'Splot\AssetsModule\Tests\Assets\Stubs\TestApplication';
+    public static $applicationClass = 'Splot\AssetsModule\Tests\Assets\Stubs\TestApplication';
 
     /**
      * @covers ::__construct()
@@ -74,6 +74,7 @@ class AssetsContainerTest extends ApplicationTestCase
         $container = $this->provideAssetsContainer($mocks);
 
         $result = $container->addAsset('/js/*.js');
+        $this->assertNotEmpty($result);
         $asset = $result[0];
         $this->assertInternalType('string', $asset->getPath());
         $this->assertInternalType('string', $asset->getUrl());
@@ -160,17 +161,22 @@ class AssetsContainerTest extends ApplicationTestCase
     }
 
     protected function provideMocks() {
-        return array(
+        $mocks = array(
             'finder' => new AssetsFinder(
-                $this->_application,
-                $this->_application->getContainer()->get('resource_finder'),
-                $this->_application->getContainer()->getParameter('web_dir'),
+                $this->application,
+                $this->application->getContainer()->get('resource_finder'),
+                $this->application->getContainer()->getParameter('web_dir'),
                 'app',
                 'assets',
                 'custom'
             ),
             'type' => null
         );
+        $mocks['minifier'] = $this->getMockBuilder('Splot\AssetsModule\Assets\AssetsMinifier')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $mocks['minify'] = false;
+        return $mocks;
     }
 
     protected function provideAssetsContainer(array $mocks = array()) {
@@ -178,7 +184,7 @@ class AssetsContainerTest extends ApplicationTestCase
             $mocks = $this->provideMocks();
         }
 
-        return $this->getMock('Splot\AssetsModule\Assets\AssetsContainer', array('printAssets'), array($mocks['finder'], $mocks['type']));
+        return $this->getMock('Splot\AssetsModule\Assets\AssetsContainer', array('printAssets'), array($mocks['finder'], $mocks['minifier'], $mocks['minify'], $mocks['type']));
     }
 
     public function provideSingleAssets() {

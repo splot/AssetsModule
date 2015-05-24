@@ -11,11 +11,10 @@ class TestApplication extends Base_TestApplication
     protected $name = 'AssetsTestApplication';
     protected $version = 'test';
 
-    public function loadParameters() {
-        $basePath = rtrim(realpath(dirname(__FILE__))) .'/';
+    public function loadParameters($env, $debug) {
         return array(
-            'application_dir' => $basePath .'app/',
-            'web_dir' => $basePath .'web/'
+            'application_dir' => __DIR__ .'/app',
+            'web_dir' => __DIR__ .'/web'
         );
     }
 

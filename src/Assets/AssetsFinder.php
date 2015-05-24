@@ -96,10 +96,10 @@ class AssetsFinder
     ) {
         $this->_application = $application;
         $this->_finder = $finder;
-        $this->_webDir = $webDir;
-        $this->_applicationAssetsDir = '/'. trim($applicationAssetsDir, '/') .'/';
-        $this->_modulesAssetsDir = '/'. trim($modulesAssetsDir, '/') .'/';
-        $this->_overwrittenModuleAssetsDir = '/'. trim($overwrittenModulesAssetsDir, '/') .'/';
+        $this->_webDir = rtrim($webDir, '/');
+        $this->_applicationAssetsDir = '/'. trim($applicationAssetsDir, '/');
+        $this->_modulesAssetsDir = '/'. trim($modulesAssetsDir, '/');
+        $this->_overwrittenModuleAssetsDir = '/'. trim($overwrittenModulesAssetsDir, '/');
     }
 
     /**
@@ -127,12 +127,12 @@ class AssetsFinder
         try {
             $file = $this->getAssetPath($resource, $type);
         } catch(ResourceNotFoundException $e) {
-            throw new ResourceNotFoundException('Could not find asset "'. $resource .'".'); // rethrow with a different message
+            throw new ResourceNotFoundException('Could not find asset "'. $resource .'".', 0, $e); // rethrow with a different message
         }
 
         // if asset is not a module resource then try it in web dir
         if (stripos($resource, '@') !== 0) {
-            $url = '/'. mb_substr($file, mb_strlen($this->_webDir));
+            $url = '/'. ltrim(mb_substr($file, mb_strlen($this->_webDir)), '/');
             $this->_urlCache[$cacheKey] = $url;
             return $url;
         }
@@ -144,14 +144,14 @@ class AssetsFinder
         list($resource, $type) = $this->transformSubdir($resource, $type);
         list($moduleName, $subDir, $resourceFile) = explode(':', $resource);
 
-        $appAssetsDir = $this->_application->getApplicationDir() .'Resources'. DS .'public'. DS;
+        $appAssetsDir = $this->_application->getApplicationDir() .'/Resources/public';
 
         if (!empty($moduleName)) {
             $module = $this->_application->getModule($moduleName);
-            $moduleAssetsDir = $module->getModuleDir() .'Resources'. DS .'public'. DS;
-            $moduleOverwrittenAssetsDir = $this->_application->getApplicationDir() .'Resources'. DS . $module->getName() . DS .'public'. DS;
+            $moduleAssetsDir = $module->getModuleDir() .'/Resources/public';
+            $moduleOverwrittenAssetsDir = $this->_application->getApplicationDir() .'/Resources/'. $module->getName() .'/public';
 
-            $moduleAssetName = preg_replace('/module$/', '', mb_strtolower($module->getName())) .'/';
+            $moduleAssetName = preg_replace('/module$/', '', mb_strtolower($module->getName()));
         }
 
         // from app dir?
@@ -159,10 +159,10 @@ class AssetsFinder
             $url = $this->_applicationAssetsDir . mb_substr($file, mb_strlen($appAssetsDir));
         } else if (stripos($file, $moduleOverwrittenAssetsDir) === 0) {
             // from overwritten module dir?
-            $url = $this->_overwrittenModuleAssetsDir . $moduleAssetName . mb_substr($file, mb_strlen($moduleOverwrittenAssetsDir));
+            $url = $this->_overwrittenModuleAssetsDir .'/'. $moduleAssetName . mb_substr($file, mb_strlen($moduleOverwrittenAssetsDir));
         } else {
             // from module dir then
-            $url = $this->_modulesAssetsDir . $moduleAssetName . mb_substr($file, mb_strlen($moduleAssetsDir));
+            $url = $this->_modulesAssetsDir .'/'. $moduleAssetName . mb_substr($file, mb_strlen($moduleAssetsDir));
         }
 
         $this->_urlCache[$cacheKey] = $url;
@@ -192,7 +192,7 @@ class AssetsFinder
 
         // if asset is not a module resource then try it in web dir
         if (stripos($resource, '@') !== 0) {
-            $path = $this->_webDir . ltrim($resource, DS);
+            $path = $this->_webDir .'/'. ltrim($resource, DS);
 
             if (!file_exists($path)) {
                 throw new ResourceNotFoundException('Resource "'. $resource .'" not found in web dir.');
@@ -233,10 +233,10 @@ class AssetsFinder
             $pattern = ltrim($resource, DS);
             $webDirLength = mb_strlen($this->_webDir);
 
-            $files = FilesystemUtils::glob($this->_webDir . $pattern, FilesystemUtils::GLOB_ROOTFIRST | GLOB_BRACE);
+            $files = FilesystemUtils::glob($this->_webDir .'/'. $pattern, FilesystemUtils::GLOB_ROOTFIRST | GLOB_BRACE);
             $resources = array();
             foreach($files as $file) {
-                $resources[] = '/'. mb_substr($file, $webDirLength);
+                $resources[] = '/'. ltrim(mb_substr($file, $webDirLength), '/');
             }
 
             return $resources;

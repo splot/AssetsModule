@@ -12,7 +12,7 @@ use Splot\AssetsModule\Assets\AssetsFinder;
 class StylesheetContainerTest extends ApplicationTestCase
 {
 
-    public static $_applicationClass = 'Splot\AssetsModule\Tests\Assets\Stubs\TestApplication';
+    public static $applicationClass = 'Splot\AssetsModule\Tests\Assets\Stubs\TestApplication';
 
     public function testType() {
         $container = $this->provideStylesheetContainer();
@@ -36,17 +36,22 @@ class StylesheetContainerTest extends ApplicationTestCase
     }
 
     protected function provideMocks() {
-        return array(
+        $mocks = array(
             'finder' => new AssetsFinder(
-                $this->_application,
-                $this->_application->getContainer()->get('resource_finder'),
-                $this->_application->getContainer()->getParameter('web_dir'),
+                $this->application,
+                $this->application->getContainer()->get('resource_finder'),
+                $this->application->getContainer()->getParameter('web_dir'),
                 'app',
                 'assets',
                 'custom'
             ),
             'type' => null
         );
+        $mocks['minifier'] = $this->getMockBuilder('Splot\AssetsModule\Assets\AssetsMinifier')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $mocks['minify'] = false;
+        return $mocks;
     }
 
     protected function provideStylesheetContainer(array $mocks = array()) {
@@ -54,7 +59,7 @@ class StylesheetContainerTest extends ApplicationTestCase
             $mocks = $this->provideMocks();
         }
 
-        return new StylesheetContainer($mocks['finder'], $mocks['type']);
+        return new StylesheetContainer($mocks['finder'], $mocks['minifier'], $mocks['minify'], $mocks['type']);
     }
 
 }

@@ -12,7 +12,7 @@ use Splot\AssetsModule\Assets\AssetsFinder;
 class JavaScriptContainerTest extends ApplicationTestCase
 {
 
-    public static $_applicationClass = 'Splot\AssetsModule\Tests\Assets\Stubs\TestApplication';
+    public static $applicationClass = 'Splot\AssetsModule\Tests\Assets\Stubs\TestApplication';
 
     public function testType() {
         $container = $this->provideJavaScriptContainer();
@@ -44,17 +44,22 @@ class JavaScriptContainerTest extends ApplicationTestCase
     }
 
     protected function provideMocks() {
-        return array(
+        $mocks = array(
             'finder' => new AssetsFinder(
-                $this->_application,
-                $this->_application->getContainer()->get('resource_finder'),
-                $this->_application->getContainer()->getParameter('web_dir'),
+                $this->application,
+                $this->application->getContainer()->get('resource_finder'),
+                $this->application->getContainer()->getParameter('web_dir'),
                 'app',
                 'assets',
                 'custom'
             ),
             'type' => null
         );
+        $mocks['minifier'] = $this->getMockBuilder('Splot\AssetsModule\Assets\AssetsMinifier')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $mocks['minify'] = false;
+        return $mocks;
     }
 
     protected function provideJavaScriptContainer(array $mocks = array()) {
@@ -62,7 +67,7 @@ class JavaScriptContainerTest extends ApplicationTestCase
             $mocks = $this->provideMocks();
         }
 
-        return new JavaScriptContainer($mocks['finder'], $mocks['type']);
+        return new JavaScriptContainer($mocks['finder'], $mocks['minifier'], $mocks['minify'], $mocks['type']);
     }
 
 }

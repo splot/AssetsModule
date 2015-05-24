@@ -1,0 +1,112 @@
+parameters:
+    assets.application_dir: application
+    assets.modules_dir: modules
+    assets.overwritten_dir: modulesapp
+
+    assets.minifier.css_enable: false
+    assets.minifier.css_dir: /_min/css
+    assets.minifier.css_minifier.name: @assets.minifiers.cssmin
+    assets.minifier.css_minifier_worker.name: @assets.minifiers.null
+
+    assets.minifier.js_enable: false
+    assets.minifier.js_dir: /_min/js
+    assets.minifier.js_minifier.name: @assets.minifiers.null
+    assets.minifier.js_minifier_worker.name: @assets.minifiers.null
+
+    assets.minifier.uglifyjs2_bin: /usr/local/bin/uglifyjs
+    assets.minifier.uglifyjs2_node_bin: /usr/local/bin/node
+
+services:
+
+    assets.finder:
+        class: Splot\AssetsModule\Assets\AssetsFinder
+        arguments:
+            - @application
+            - @resource_finder
+            - %web_dir%
+            - %assets.application_dir%
+            - %assets.modules_dir%
+            - %assets.overwritten_dir%
+        aliases: ["assets_finder"]
+
+    # asset containers
+    assets.stylesheets:
+        class: Splot\AssetsModule\Assets\AssetsContainer\StylesheetContainer
+        arguments:
+            - @assets.finder
+            - @assets.minifier.css
+            - %assets.minifier.css_enable%
+        aliases: ["stylesheets"]
+     
+    assets.javascripts:
+        class: Splot\AssetsModule\Assets\AssetsContainer\JavaScriptContainer
+        arguments:
+            - @assets.finder
+            - @assets.minifier.javascript
+            - %assets.minifier.js_enable%
+        aliases: ["javascripts"]
+
+    # injector
+    assets.injector:
+        class: Splot\AssetsModule\EventListener\InjectAssets
+        arguments:
+            - @assets.javascripts
+            - @assets.stylesheets
+        notify:
+            - ["@event_manager", "subscribeService", ["%event.response%", "@=", "injectAssetsOnResponse", -9999]]
+
+    # twig extension
+    assets.twig_extension:
+        class: Splot\AssetsModule\Twig\Extension\AssetsExtension
+        arguments:
+            - @assets.finder
+            - @assets.javascripts
+            - @assets.stylesheets
+        notify:
+            - ["@twig", "addExtension", ["@"]]
+
+    # minifiers
+    assets.minifier.css:
+        class: Splot\AssetsModule\Assets\AssetsMinifier
+        arguments:
+            - %assets.minifier.css_minifier.name%
+            - %web_dir%
+            - %assets.minifier.css_dir%
+            - css
+
+    assets.minifier.javascript:
+        class: Splot\AssetsModule\Assets\AssetsMinifier
+        arguments:
+            - %assets.minifier.js_minifier.name%
+            - %web_dir%
+            - %assets.minifier.js_dir%
+            - js
+
+    # actual minifiers
+    
+    assets.minifiers.null:
+        class: Splot\AssetsModule\Minifier\NullMinifier
+
+    assets.minifiers.cssmin:
+        class: Splot\AssetsModule\Minifier\Css\CssMin
+
+    assets.minifiers.jsqueeze:
+        class: Splot\AssetsModule\Minifier\JavaScript\JSqueeze
+
+    assets.minifiers.uglifyjs2:
+        class: Splot\AssetsModule\Minifier\JavaScript\UglifyJs2
+        arguments:
+            - %assets.minifier.uglifyjs2_bin%
+            - %assets.minifier.uglifyjs2_node_bin%
+
+    assets.minifiers.worker.css:
+        class: Splot\AssetsModule\Minifier\WorkerMinifier
+        arguments:
+            - @work_queue
+            - %assets.minifier.css_minifier_worker.name%
+
+    assets.minifiers.worker.js:
+        class: Splot\AssetsModule\Minifier\WorkerMinifier
+        arguments:
+            - @work_queue
+            - %assets.minifier.js_minifier_worker.name%

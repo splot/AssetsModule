@@ -18,7 +18,7 @@ class TestApplication extends Base_TestApplication
         );
     }
 
-    public function loadModules() {
+    public function loadModules($env, $debug) {
         return array(
             new SplotAssetsTestModule()
         );

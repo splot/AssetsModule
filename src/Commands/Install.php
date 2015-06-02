@@ -4,7 +4,7 @@ namespace Splot\AssetsModule\Commands;
 use Splot\Framework\Console\AbstractCommand;
 use Splot\Framework\Modules\AbstractModule;
 
-class Install extends AbstractCommand 
+class Install extends AbstractCommand
 {
 
     protected static $name = 'install';
@@ -16,20 +16,20 @@ class Install extends AbstractCommand
     public function execute() {
         $this->writeln();
 
-        $application = $this->get('application');
+        $application = $this->container->get('application');
 
         // get SplotAssetsModule and its config, and filesystem
         $assetsModule = $application->getModule('SplotAssetsModule');
-        $config = $assetsModule->getConfig();
 
         // create dirs 
-        $webDir = $this->getParameter('web_dir');
-        $applicationAssetsDir = $webDir . $config->get('application_dir');
-        $moduleAssetsDir = $webDir . $config->get('modules_dir');
-        $overwrittenAssetsDir = $webDir . $config->get('overwritten_dir');
+        $webDir = rtrim($this->container->getParameter('web_dir'), '/');
+        $applicationDir = rtrim($this->container->getParameter('application_dir'), '/');
+        $applicationAssetsDir = $webDir .'/'. rtrim($this->container->getParameter('assets.application_dir'), '/');
+        $moduleAssetsDir = $webDir .'/'. rtrim($this->container->getParameter('assets.modules_dir'), '/');
+        $overwrittenAssetsDir = $webDir .'/'. rtrim($this->container->getParameter('assets.overwritten_dir'), '/');
 
         // install global application assets
-        $this->installApplicationAssets($this->getParameter('application_dir'), $applicationAssetsDir);
+        $this->installApplicationAssets($applicationDir, $applicationAssetsDir);
 
         // install assets for all modules
         $modules = $application->getModules();
@@ -37,7 +37,7 @@ class Install extends AbstractCommand
             $this->installModuleAssets($module, $moduleAssetsDir);
 
             // also install overwritten assets dirs
-            $this->installOverwrittenModuleAssets($module, $this->getParameter('application_dir'), $overwrittenAssetsDir);
+            $this->installOverwrittenModuleAssets($module, $applicationDir, $overwrittenAssetsDir);
         }
 
         $this->writeln('Done.');
@@ -51,10 +51,11 @@ class Install extends AbstractCommand
      */
     protected function installApplicationAssets($applicationDir, $linkDir) {
         $filesystem = $this->get('filesystem');
-        $rootDir = $this->getParameter('root_dir');
+        $applicationDir = rtrim($applicationDir, '/');
+        $rootDir = rtrim($this->container->getParameter('root_dir'), '/');
         $linkDir = rtrim($linkDir, '/');
 
-        $applicationAssetsDir = $applicationDir .'Resources/public';
+        $applicationAssetsDir = $applicationDir .'/Resources/public';
 
         // break if there are no assets added to the application
         if (!is_dir($applicationAssetsDir)) {
@@ -75,17 +76,17 @@ class Install extends AbstractCommand
      */
     protected function installModuleAssets(AbstractModule $module, $linkDir) {
         $filesystem = $this->get('filesystem');
-        $rootDir = $this->getParameter('root_dir');
-        $linkDir = rtrim($linkDir, '/') .'/';
+        $rootDir = rtrim($this->container->getParameter('root_dir'), '/');
+        $linkDir = rtrim($linkDir, '/');
 
-        $moduleAssetsDir = $module->getModuleDir() .'Resources/public';
+        $moduleAssetsDir = $module->getModuleDir() .'/Resources/public';
 
         // break if no assets have been added to this module
         if (!file_exists($moduleAssetsDir) || !is_dir($moduleAssetsDir)) {
             return false;
         }
 
-        $moduleLinkDir = $linkDir . preg_replace('/module$/', '', strtolower($module->getName()));
+        $moduleLinkDir = $linkDir .'/'. preg_replace('/module$/', '', strtolower($module->getName()));
 
         $this->writeln('Installing assets for <info>'. $module->getName() .'</info> into <comment>'. $filesystem->makePathRelative($moduleLinkDir, $rootDir) .'</comment>');
 
@@ -102,17 +103,17 @@ class Install extends AbstractCommand
      */
     protected function installOverwrittenModuleAssets(AbstractModule $module, $applicationDir, $linkDir) {
         $filesystem = $this->get('filesystem');
-        $rootDir = $this->getParameter('root_dir');
-        $linkDir = rtrim($linkDir, '/') .'/';
+        $rootDir = rtrim($this->container->getParameter('root_dir'), '/');
+        $linkDir = rtrim($linkDir, '/');
 
-        $overwrittenAssetsDir = $applicationDir .'Resources/'. $module->getName() .'/public';
+        $overwrittenAssetsDir = $applicationDir .'/Resources/'. $module->getName() .'/public';
 
         // break if there are no overwritten assets for this module
         if (!is_dir($overwrittenAssetsDir)) {
             return false;
         }
 
-        $overwrittenLinkDir = $linkDir . preg_replace('/module$/', '', strtolower($module->getName()));
+        $overwrittenLinkDir = $linkDir .'/'. preg_replace('/module$/', '', strtolower($module->getName()));
 
         $this->writeln('Installing overwritten assets for <info>'. $module->getName() .'</info> into <comment>'. $filesystem->makePathRelative($overwrittenLinkDir, $rootDir) .'</comment>');
 
